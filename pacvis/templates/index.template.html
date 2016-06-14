@@ -25,7 +25,7 @@
   <script type="text/javascript">
     var nodes = new vis.DataSet([
       {% for node in nodes %}
-        {id: {{node["id"]}}, label: '{{node["label"]}}', level: {{node["level"]}} },
+        {id: {{node["id"]}}, label: '{{node["label"]}}', level: {{node["level"]}}, group: '{{node["group"]}}', title:'{{node["title"]}}'  },
       {% end %}
     ]);
 
@@ -43,8 +43,10 @@
       edges: edges
     };
     var options = {
-      nodes: {
-          shape: 'dot',
+      groups: {
+        standalone: { shape: 'square',},
+        normal: { shape: 'dot',},
+        consolidated: { shape: 'star', color: 'red'},
       },
       edges: {
          smooth: {
@@ -75,7 +77,7 @@
         hierarchicalRepulsion: {
           nodeDistance: 300,
           springLength: 600,
-          springConstant: 0.2,
+          springConstant: 0.5,
         },
         timestep: 0.3,
         // barnesHut: {

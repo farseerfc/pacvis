@@ -10,6 +10,7 @@ handle = pyalpm.Handle("/","/var/lib/pacman")
 localdb = handle.get_localdb()
 packages = localdb.pkgcache
 
+consolidate_threshold = 2
 
 def resolve_dependency(dep):
     pkg = localdb.get_pkg(dep)
@@ -29,6 +30,9 @@ class PkgInfo:
         self.level = 1
         self.circledeps = []
         PkgInfo.all_pkgs[name] = self
+
+    def info(self):
+        return "%s depends:[%s]" % (self.name, ", ".join(self.deps))
 
     @classmethod
     def get(cls, pkg):
@@ -73,6 +77,41 @@ class PkgInfo:
             if pkg not in indexes:
                 strongconnect(pkg)
 
+    @classmethod
+    def consolidate(cls):
+        depmap = {}
+        for name,pkg in cls.all_pkgs.items():
+            deps = tuple(sorted(pkg.deps))
+            reqs = tuple(sorted(pkg.requiredby))
+            key = (deps, reqs)
+            if key in depmap:
+                depmap[key].append(pkg)
+            else:
+                depmap[key] = [pkg]
+        start_message("Consolidating ")
+        for key,pkgs in depmap.items():
+            if len(pkgs) > consolidate_threshold:
+                consolidated = ConsolidatePkg(pkgs)
+                for pkg in pkgs:
+                    append_message("remove "+pkg.name)
+                    cls.all_pkgs.pop(pkg.name)
+                    for dep in consolidated.deps:
+                        if pkg.name in cls.all_pkgs[dep].requiredby:
+                            cls.all_pkgs[dep].requiredby.remove(pkg.name)
+                    for dep in consolidated.requiredby:
+                        if pkg.name in cls.all_pkgs[dep].deps:
+                            cls.all_pkgs[dep].deps.remove(pkg.name)
+                cls.all_pkgs[consolidated.name] = consolidated
+                for dep in consolidated.deps:
+                    cls.all_pkgs[dep].requiredby.append(consolidated.name)
+                for dep in consolidated.requiredby:
+                    cls.all_pkgs[dep].deps.append(consolidated.name)
+                append_message("add " + consolidated.name)
+                append_message("Packages: [%s] deps: [%s] reqs: [%s]" % (
+                    ", ".join(pkg.name for pkg in pkgs),
+                    ", ".join(consolidated.deps),
+                    ", ".join(consolidated.requiredby)
+                    ))
 
     @classmethod
     def topology_sort(cls):
@@ -93,6 +132,22 @@ class PkgInfo:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
                     .difference(cls.get(pkg).circledeps))
+
+
+class ConsolidatePkg(PkgInfo):
+    def __init__ (self, pkgs):
+        self.pkgs = pkgs
+        self.deps = pkgs[0].deps
+        self.requiredby = pkgs[0].requiredby
+        self.circledeps = []
+        self.level = 1
+        self.name = "Group(%d, (%s), (%s))" % ( len(pkgs),
+            ",".join(self.deps),
+            ",".join(self.requiredby)
+            )
+
+    def info(self):
+        return "Group [%s] depends:[%s]" % (", ".join(x.name for x in self.pkgs), ", ".join(self.deps))
 
 def test_circle_detection():
     start_message("find all packages...")
@@ -121,9 +176,11 @@ class MainHandler(tornado.web.RequestHandler):
         start_message("Loading local database...")
         PkgInfo.find_all()
         append_message("done")
+        append_message("done")
         start_message("Finding all dependency circles...")
         PkgInfo.find_circles()
         append_message("done")
+        PkgInfo.consolidate()
         PkgInfo.topology_sort()
 
         print_message("Rendering")
@@ -136,7 +193,12 @@ class MainHandler(tornado.web.RequestHandler):
             pkg.id = ids
             ids += 1
             if pkg.level < MAX_LEVEL:
-                nodes.append({"id": pkg.id, "label": pkg.name, "level": pkg.level})
+                nodes.append({"id": pkg.id,
+                              "label": pkg.name,
+                              "level": pkg.level,
+                              "title": pkg.info(),
+                              "group": "consolidated" if isinstance(pkg, ConsolidatePkg) else "standalone" if pkg.level == 0 else "normal"
+                              })
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
             if pkg.level < MAX_LEVEL:
                 for dep in pkg.deps:
