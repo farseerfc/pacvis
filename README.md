@@ -19,7 +19,7 @@ Then
 python pacvis.py
 ```
 
-Then go to `http://localhost:8888/?maxlevel=40`.
+Then go to `http://localhost:8888/?maxlevel=30`.
 
 You may need to zoom-in initially to see the rendered picture.
 Currenly we have scalability issue when there are too may packages, so we need

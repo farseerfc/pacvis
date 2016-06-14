@@ -25,7 +25,7 @@
   <script type="text/javascript">
     var nodes = new vis.DataSet([
       {% for node in nodes %}
-        {id: {{node["id"]}}, label: '{{node["label"]}}', level: {{node["level"]}}, group: '{{node["group"]}}', title:'{{node["title"]}}' , value:'{{node["size"]}}' },
+        {id: {{node["id"]}}, label: '{{node["label"]}}', level: {{node["level"]}}, group: '{{node["group"]}}', title:'{{node["title"]}}'},
       {% end %}
     ]);
 
@@ -45,8 +45,8 @@
     var options = {
       groups: {
         standalone: { shape: 'square', size: 12 },
-        normal: { shape: 'ellipse', color: 'rgb(200,255,200)'},
-        explicit: { shape: 'ellipse', color: 'rgb(200,200,255)'},
+        normal: { shape: 'dot', color: 'rgb(200,255,200)'},
+        explicit: { shape: 'dot', color: 'rgb(200,200,255)'},
         consolidated: { shape: 'star', color: 'red', size: 12},
       },
       nodes: {

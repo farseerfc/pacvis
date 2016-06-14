@@ -201,7 +201,7 @@ def test_circle_detection():
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        MAX_LEVEL = int(self.get_argument("maxlevel", "40"))
+        MAX_LEVEL = int(self.get_argument("maxlevel", "30"))
         PkgInfo.all_pkgs = {}
         print_message("Max level: %d" % MAX_LEVEL)
         start_message("Loading local database...")
