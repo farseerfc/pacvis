@@ -39,36 +39,35 @@ class PkgInfo:
 
     @classmethod
     def find_circles(cls):
-        """
-            https://zh.wikipedia.org/wiki/Tarjan%E7%AE%97%E6%B3%95
-        """
-        cls.stack = list()
-        cls.indexes = dict()
-        cls.lowlinks = dict()
-        cls.index = 0
+        """ https://zh.wikipedia.org/wiki/Tarjan%E7%AE%97%E6%B3%95 """
+        stack = list()
+        indexes = dict()
+        lowlinks = dict()
+        index = 0
 
         def strongconnect(pkg):
-            cls.indexes[pkg] = cls.index
-            cls.lowlinks[pkg] = cls.index
-            cls.index += 1
-            cls.stack.append(pkg)
+            nonlocal stack, indexes, lowlinks, index
+            indexes[pkg] = index
+            lowlinks[pkg] = index
+            index += 1
+            stack.append(pkg)
             for dep in cls.get(pkg)._deps:
-                if dep not in cls.indexes:
+                if dep not in indexes:
                     strongconnect(dep)
-                    cls.lowlinks[pkg] = min(cls.lowlinks[pkg], cls.lowlinks[dep])
-                elif dep in cls.stack:
-                    cls.lowlinks[pkg] = min(cls.lowlinks[pkg], cls.indexes[dep])
-            if cls.lowlinks[pkg] == cls.indexes[pkg]:
+                    lowlinks[pkg] = min(lowlinks[pkg], lowlinks[dep])
+                elif dep in stack:
+                    lowlinks[pkg] = min(lowlinks[pkg], indexes[dep])
+            if lowlinks[pkg] == indexes[pkg]:
                 cirdeps = []
                 while True:
-                    w = cls.stack.pop()
+                    w = stack.pop()
                     cirdeps.append(w)
                     if (w == pkg):
                         break
                 cls.get(pkg)._circledeps = cirdeps
 
         for pkg in cls.all_pkgs:
-            if pkg not in cls.indexes:
+            if pkg not in indexes:
                 strongconnect(pkg)
 
 
@@ -85,7 +84,8 @@ class PkgInfo:
             max_level = max(cls.get(x)._level for x in cls.get(pkg)._deps)
             if max_level + 1 != origin_level:
                 cls.get(pkg)._level = max_level + 1
-                remain_pkgs.update(set(cls.get(pkg)._requiredby).difference(cls.get(pkg)._circledeps))
+                remain_pkgs.update(set(cls.get(pkg)._requiredby)
+                    .difference(cls.get(pkg)._circledeps))
 
 
 MAX_LEVEL = 4
@@ -130,7 +130,8 @@ def test():
     append_message("done")
     for name,pkg in PkgInfo.all_pkgs.items():
         if len(pkg._circledeps)>1:
-            print_message("%s(%s): %s" % (pkg._name, pkg._circledeps , ", ".join(pkg._deps)))
+            print_message("%s(%s): %s" %
+                (pkg._name, pkg._circledeps , ", ".join(pkg._deps)))
     PkgInfo.topology_sort()
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
         print("%s(%d): %s" % (pkg._name, pkg._level , ", ".join(pkg._deps)))
