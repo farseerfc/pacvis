@@ -1,4 +1,5 @@
 import math
+import random
 
 import pyalpm
 import tornado.ioloop
@@ -246,9 +247,10 @@ class MainHandler(tornado.web.RequestHandler):
         self.render("templates/index.template.html", nodes=nodes, links=links)
 
 def make_app():
+    import os
     return tornado.web.Application([
         (r"/", MainHandler),
-    ], debug=True)
+    ], debug=True, static_path= os.path.join(os.path.dirname(__file__), "static"))
 
 if __name__ == "__main__":
     app = make_app()

@@ -3,7 +3,7 @@
 <head>
   <title>PacVis</title>
 
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
+  <script type="text/javascript" src="static/vis-network.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css" />
 
   <style type="text/css">
@@ -25,14 +25,14 @@
   <script type="text/javascript">
     var nodes = new vis.DataSet([
       {% for node in nodes %}
-        {id: {{node["id"]}}, label: '{{node["label"]}}', level: {{node["level"]}}, group: '{{node["group"]}}', title:'{{node["title"]}}'},
+        {id: {{node["id"]}} , label: '{{node["label"]}}', level: {{node["level"]}}, group: '{{node["group"]}}', title:'{{node["title"]}}'},
       {% end %}
     ]);
 
 
     var edges = new vis.DataSet([
       {% for link in links %}
-        {from: {{link["from"]}}, to: {{link["to"]}}, arrows:"to" },
+        {from: {{link["from"]}}, to: {{link["to"]}} },
       {% end %}
     ]);
 
@@ -49,52 +49,55 @@
         explicit: { shape: 'dot', color: 'rgb(200,200,255)'},
         consolidated: { shape: 'star', color: 'red', size: 12},
       },
-      nodes: {
-        scaling: {
-          // customScalingFunction: function (min,max,total,value) {
-          //   return value/total;
-          // },
-        }
-      },
+      // nodes: {
+      //   scaling: {
+      //     // customScalingFunction: function (min,max,total,value) {
+      //     //   return value/total;
+      //     // },
+      //   }
+      // },
       edges: {
          smooth: {
-             type: 'cubicBezier',
-             forceDirection: 'vertical' ,
-             roundness: 0.4
-         }
+             type: 'horizontal',
+            //  forceDirection: 'vertical' ,
+            //  roundness: 0.4
+         },
+         arrows: {to : true }
       },
       layout: {
          hierarchical: {
              direction: "UD",
-             nodeSpacing: 200,
-             treeSpacing: 150,
-             levelSeparation: 130,
+             nodeSpacing: 500,
+             treeSpacing: 100,
+             levelSeparation: 100,
              blockShifting: false,
              edgeMinimization: false,
              parentCentralization: false
          },
-        // repulsion: {
-        //   nodeDistance: 400
-        // },
-        // barnesHut: {
-        //   springLength: 300,
-        //   springConstant: 0.1
-        // },
         improvedLayout: true
       },
       // physics: false,
       physics: {
-        maxVelocity: 1000,
+        maxVelocity: 100,
         hierarchicalRepulsion: {
-          nodeDistance: 200,
-          springLength: 180,
+          nodeDistance: 500,
+          springLength: 400,
           springConstant: 0.2,
-          damping: 0.9,
-          centralGravity: 0.1
+          damping: 0.1
         },
-        timestep: 0.5,
+        // barnesHut: {
+        //   gravitationalConstant: -100000,
+        //   springLength: 200,
+        //   springConstant: 0.1,
+        //   avoidOverlap: 0.5
+        // },
+        // repulsion: {
+        //   nodeDistance: 400,
+        //   springLength: 200,
+        // },
+        timestep: 0.1,
         stabilization: {
-          iterations: 20000,
+          iterations: 5000,
           updateInterval: 100,
         }
       }
@@ -102,15 +105,12 @@
     var network = new vis.Network(container, data, options);
     network.on("startStabilizing", function (params) {
       document.title = 'PacVis | ';
-      console.log("started")
     });
     network.on("stabilizationProgress", function (params) {
       document.title = 'PacVis | ' +  Math.round(params.iterations/params.total*100) + "%";
-      console.log("progress:",params);
     });
     network.on("stabilizationIterationsDone", function (params) {
       document.title = 'PacVis';
-      console.log("finished stabilization interations");
     });
   </script>
 
