@@ -1,10 +1,10 @@
 # pacvis
 
-Visualize pacman database using [Vis.js](http://visjs.org/),
+Visualize pacman local database using [Vis.js](http://visjs.org/),
 inspired by [pacgraph](http://kmkeen.com/pacgraph/).
 
-![full](full.png)
-![zoomin](zoomin.png)
+![full](screenshots/full.png)
+![zoomin](screenshots/zoomin.png)
 
 ## How to use
 
