@@ -95,7 +95,7 @@ class PkgInfo:
                     .difference(cls.get(pkg)._circledeps))
 
 
-MAX_LEVEL = 3
+MAX_LEVEL = 40
 
 def main():
     start_message("Loading local database...")
