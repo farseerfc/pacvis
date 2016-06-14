@@ -11,7 +11,7 @@ handle = pyalpm.Handle("/","/var/lib/pacman")
 localdb = handle.get_localdb()
 packages = localdb.pkgcache
 
-consolidate_threshold = 3
+consolidate_threshold = 3000
 
 def resolve_dependency(dep):
     pkg = localdb.get_pkg(dep)
