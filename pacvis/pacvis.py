@@ -1,8 +1,8 @@
 import math
 
 import pyalpm
-import jinja2
-
+import tornado.ioloop
+import tornado.web
 
 from console import start_message, append_message, print_message
 
@@ -98,6 +98,7 @@ class PkgInfo:
 MAX_LEVEL = 40
 
 def main():
+    import jinja2
     start_message("Loading local database...")
     PkgInfo.find_all()
     append_message("done")
@@ -143,5 +144,45 @@ def test():
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
         print("%s(%d): %s" % (pkg._name, pkg._level , ", ".join(pkg._deps)))
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
+
+### Tornado entry
+
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        start_message("Loading local database...")
+        PkgInfo.find_all()
+        append_message("done")
+        start_message("Finding all dependency circles...")
+        PkgInfo.find_circles()
+        append_message("done")
+        PkgInfo.topology_sort()
+
+        print_message("Rendering")
+
+        nodes = []
+        links = []
+
+        ids = 0
+        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
+            pkg.id = ids
+            ids += 1
+            if pkg._level < MAX_LEVEL:
+                nodes.append({"id": pkg.id, "label": pkg._name, "level": pkg._level})
+        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
+            if pkg._level < MAX_LEVEL:
+                for dep in pkg._deps:
+                    links.append({"from": pkg.id, "to": PkgInfo.all_pkgs[dep].id})
+
+        self.render("templates/index.template.html", nodes=nodes, links=links)
+
+def make_app():
+    return tornado.web.Application([
+        (r"/", MainHandler),
+    ])
+
+if __name__ == "__main__":
+    app = make_app()
+    app.listen(8888)
+    tornado.ioloop.IOLoop.current().start()
