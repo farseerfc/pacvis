@@ -10,7 +10,7 @@ handle = pyalpm.Handle("/","/var/lib/pacman")
 localdb = handle.get_localdb()
 packages = localdb.pkgcache
 
-consolidate_threshold = 2
+consolidate_threshold = 1000
 
 def resolve_dependency(dep):
     pkg = localdb.get_pkg(dep)
@@ -32,7 +32,7 @@ class PkgInfo:
         PkgInfo.all_pkgs[name] = self
 
     def info(self):
-        return "%s depends:[%s]" % (self.name, ", ".join(self.deps))
+        return "%s(%d) depends:[%s]" % (self.name, self.level, ", ".join(self.deps))
 
     @classmethod
     def get(cls, pkg):
@@ -132,6 +132,23 @@ class PkgInfo:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
                     .difference(cls.get(pkg).circledeps))
+        remain_pkgs = {x for x in cls.all_pkgs}
+        start_message("Resorting ")
+        while len(remain_pkgs) > 0:
+            pkg = remain_pkgs.pop()
+            origin_level = cls.get(pkg).level
+            append_message("%s %d (remaining %d)" % (pkg, origin_level, len(remain_pkgs)))
+            if len(cls.get(pkg).requiredby) == 0:
+                if len(cls.get(pkg).deps) == 0:
+                    cls.get(pkg).level = 0
+                continue
+            min_level = min(cls.get(x).level for x in cls.get(pkg).requiredby)
+            # below is magic
+            new_level = min_level - 1
+            if new_level > origin_level:
+                cls.get(pkg).level = new_level
+                remain_pkgs.update(set(cls.get(pkg).deps)
+                    .difference(cls.get(pkg).circledeps))
 
 
 class ConsolidatePkg(PkgInfo):
@@ -147,7 +164,7 @@ class ConsolidatePkg(PkgInfo):
             )
 
     def info(self):
-        return "Group [%s] depends:[%s]" % (", ".join(x.name for x in self.pkgs), ", ".join(self.deps))
+        return "Group [%s] (%d) depends:[%s]" % (", ".join(x.name for x in self.pkgs), self.level, ", ".join(self.deps))
 
 def test_circle_detection():
     start_message("find all packages...")
@@ -172,6 +189,7 @@ def test_circle_detection():
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         MAX_LEVEL = int(self.get_argument("maxlevel", "40"))
+        PkgInfo.all_pkgs = {}
         print_message("Max level: %d" % MAX_LEVEL)
         start_message("Loading local database...")
         PkgInfo.find_all()
