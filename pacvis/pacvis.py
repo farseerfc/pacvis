@@ -112,6 +112,7 @@ class PkgInfo:
                     ", ".join(consolidated.deps),
                     ", ".join(consolidated.requiredby)
                     ))
+        append_message("... done")
 
     @classmethod
     def topology_sort(cls):
