@@ -22,12 +22,12 @@ class PkgInfo:
     all_pkgs = {}
 
     def __init__(self, name):
-        self._name = name
-        self._pkg = localdb.get_pkg(name)
-        self._deps = [resolve_dependency(dep).name for dep in self._pkg.depends]
-        self._requiredby = self._pkg.compute_requiredby()
-        self._level = 1
-        self._circledeps = []
+        self.name = name
+        self.pkg = localdb.get_pkg(name)
+        self.deps = [resolve_dependency(dep).name for dep in self.pkg.depends]
+        self.requiredby = self.pkg.compute_requiredby()
+        self.level = 1
+        self.circledeps = []
         PkgInfo.all_pkgs[name] = self
 
     @classmethod
@@ -54,7 +54,7 @@ class PkgInfo:
             lowlinks[pkg] = index
             index += 1
             stack.append(pkg)
-            for dep in cls.get(pkg)._deps:
+            for dep in cls.get(pkg).deps:
                 if dep not in indexes:
                     strongconnect(dep)
                     lowlinks[pkg] = min(lowlinks[pkg], lowlinks[dep])
@@ -67,7 +67,7 @@ class PkgInfo:
                     cirdeps.append(w)
                     if (w == pkg):
                         break
-                cls.get(pkg)._circledeps = cirdeps
+                cls.get(pkg).circledeps = cirdeps
 
         for pkg in cls.all_pkgs:
             if pkg not in indexes:
@@ -80,56 +80,21 @@ class PkgInfo:
         start_message("Sorting ")
         while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
-            origin_level = cls.get(pkg)._level
+            origin_level = cls.get(pkg).level
             append_message("%s %d (remaining %d)" % (pkg, origin_level, len(remain_pkgs)))
-            if len(cls.get(pkg)._deps) == 0:
-                if len(cls.get(pkg)._requiredby) == 0:
-                    cls.get(pkg)._level = 0
+            if len(cls.get(pkg).deps) == 0:
+                if len(cls.get(pkg).requiredby) == 0:
+                    cls.get(pkg).level = 0
                 continue
-            max_level = max(cls.get(x)._level for x in cls.get(pkg)._deps)
+            max_level = max(cls.get(x).level for x in cls.get(pkg).deps)
             # below is magic
-            new_level = max_level + math.log(1+ len(cls.get(pkg)._deps) + len(cls.get(pkg)._requiredby)) + 1
+            new_level = max_level + math.log(1+ len(cls.get(pkg).deps) + len(cls.get(pkg).requiredby)) + 1
             if new_level != origin_level:
-                cls.get(pkg)._level = new_level
-                remain_pkgs.update(set(cls.get(pkg)._requiredby)
-                    .difference(cls.get(pkg)._circledeps))
+                cls.get(pkg).level = new_level
+                remain_pkgs.update(set(cls.get(pkg).requiredby)
+                    .difference(cls.get(pkg).circledeps))
 
-
-MAX_LEVEL = 40
-
-def main():
-    import jinja2
-    start_message("Loading local database...")
-    PkgInfo.find_all()
-    append_message("done")
-    start_message("Finding all dependency circles...")
-    PkgInfo.find_circles()
-    append_message("done")
-    PkgInfo.topology_sort()
-
-    print_message("Writing to index.html")
-
-    nodes = []
-    links = []
-
-    ids = 0
-    for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
-        pkg.id = ids
-        ids += 1
-        if pkg._level < MAX_LEVEL:
-            nodes.append({"id": pkg.id, "label": pkg._name, "level": pkg._level})
-    for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
-        if pkg._level < MAX_LEVEL:
-            for dep in pkg._deps:
-                links.append({"from": pkg.id, "to": PkgInfo.all_pkgs[dep].id})
-
-    env = jinja2.Environment(loader=jinja2.PackageLoader('pacvis', 'templates'))
-    template = env.get_template("index.template.html")
-    with open("index.html", "w") as content:
-        content.write(template.render(nodes=nodes, links=links))
-
-
-def test():
+def test_circle_detection():
     start_message("find all packages...")
     PkgInfo.find_all()
     append_message("done")
@@ -137,20 +102,22 @@ def test():
     PkgInfo.find_circles()
     append_message("done")
     for name,pkg in PkgInfo.all_pkgs.items():
-        if len(pkg._circledeps) > 1:
+        if len(pkg.circledeps) > 1:
             print_message("%s(%s): %s" %
-                (pkg._name, pkg._circledeps , ", ".join(pkg._deps)))
+                (pkg.name, pkg.circledeps , ", ".join(pkg.deps)))
     PkgInfo.topology_sort()
-    for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
-        print("%s(%d): %s" % (pkg._name, pkg._level , ", ".join(pkg._deps)))
+    for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
+        print("%s(%d): %s" % (pkg.name, pkg.level , ", ".join(pkg.deps)))
 
-# if __name__ == '__main__':
+# if _name__ == '__main__':
 #     main()
 
 ### Tornado entry
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
+        MAX_LEVEL = int(self.get_argument("maxlevel", "40"))
+        print_message("Max level: %d" % MAX_LEVEL)
         start_message("Loading local database...")
         PkgInfo.find_all()
         append_message("done")
@@ -165,14 +132,14 @@ class MainHandler(tornado.web.RequestHandler):
         links = []
 
         ids = 0
-        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
+        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
             pkg.id = ids
             ids += 1
-            if pkg._level < MAX_LEVEL:
-                nodes.append({"id": pkg.id, "label": pkg._name, "level": pkg._level})
-        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
-            if pkg._level < MAX_LEVEL:
-                for dep in pkg._deps:
+            if pkg.level < MAX_LEVEL:
+                nodes.append({"id": pkg.id, "label": pkg.name, "level": pkg.level})
+        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
+            if pkg.level < MAX_LEVEL:
+                for dep in pkg.deps:
                     links.append({"from": pkg.id, "to": PkgInfo.all_pkgs[dep].id})
 
         self.render("templates/index.template.html", nodes=nodes, links=links)
@@ -180,7 +147,7 @@ class MainHandler(tornado.web.RequestHandler):
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
-    ])
+    ], debug=True)
 
 if __name__ == "__main__":
     app = make_app()
