@@ -58,8 +58,12 @@
       layout: {
          hierarchical: {
              direction: "UD",
-             nodeSpacing: 3,
-             treeSpacing: 1,
+             nodeSpacing: 200,
+             treeSpacing: 150,
+             levelSeparation: 130,
+             blockShifting: false,
+             edgeMinimization: false,
+             parentCentralization: false
          },
         // repulsion: {
         //   nodeDistance: 400
@@ -70,23 +74,36 @@
         // },
         improvedLayout: true
       },
-      // physics: false
+      // physics: false,
       physics: {
-        maxVelocity: 10000,
-        // stabilization: true,
+        maxVelocity: 1000,
         hierarchicalRepulsion: {
-          nodeDistance: 150,
-          springLength: 200,
-          springConstant: 0.5,
+          nodeDistance: 200,
+          springLength: 180,
+          springConstant: 0.2,
+          damping: 0.9,
+          centralGravity: 0.1
         },
-        timestep: 0.3,
-        // barnesHut: {
-        //   springLength: 300,
-        //   springConstant: 0.1
-        // },
+        timestep: 0.5,
+        stabilization: {
+          iterations: 20000,
+          updateInterval: 100,
+        }
       }
     };
     var network = new vis.Network(container, data, options);
+    network.on("startStabilizing", function (params) {
+      document.title = 'PacVis | ';
+      console.log("started")
+    });
+    network.on("stabilizationProgress", function (params) {
+      document.title = 'PacVis | ' +  Math.round(params.iterations/params.total*100) + "%";
+      console.log("progress:",params);
+    });
+    network.on("stabilizationIterationsDone", function (params) {
+      document.title = 'PacVis';
+      console.log("finished stabilization interations");
+    });
   </script>
 
 </body>
