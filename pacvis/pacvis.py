@@ -27,12 +27,6 @@ class PkgInfo:
         self._circledeps = []
         PkgInfo.all_pkgs[name] = self
 
-    def name(self):
-        return self._name
-
-    def depends(self):
-        return self._deps
-
     @classmethod
     def get(cls, pkg):
         return cls.all_pkgs[pkg]
@@ -58,7 +52,7 @@ class PkgInfo:
             cls.lowlinks[pkg] = cls.index
             cls.index += 1
             cls.stack.append(pkg)
-            for dep in cls.get(pkg).depends():
+            for dep in cls.get(pkg)._deps:
                 if dep not in cls.indexes:
                     strongconnect(dep)
                     cls.lowlinks[pkg] = min(cls.lowlinks[pkg], cls.lowlinks[dep])
@@ -82,18 +76,19 @@ class PkgInfo:
     def topology_sort(cls):
         remain_pkgs = {x for x in cls.all_pkgs}
         start_message("Sorting ")
-        while len(remain_pkgs)>0:
+        while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
             origin_level = cls.get(pkg)._level
             append_message("%s %d (remaining %d)" % (pkg, origin_level, len(remain_pkgs)))
-            if len(cls.get(pkg).depends()) == 0:
+            if len(cls.get(pkg)._deps) == 0:
                 continue
-            max_level = max(cls.get(x)._level for x in cls.get(pkg).depends())
+            max_level = max(cls.get(x)._level for x in cls.get(pkg)._deps)
             if max_level + 1 != origin_level:
                 cls.get(pkg)._level = max_level + 1
                 remain_pkgs.update(set(cls.get(pkg)._requiredby).difference(cls.get(pkg)._circledeps))
 
 
+MAX_LEVEL = 4
 
 def main():
     start_message("Loading local database...")
@@ -105,24 +100,20 @@ def main():
     PkgInfo.topology_sort()
 
     print_message("Writing to index.html")
-    levels = {}
 
     nodes = []
     links = []
 
+    ids = 0
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
-        if pkg._level in levels:
-            pkg._pos = levels[pkg._level]
-            levels[pkg._level] += 1
-        else:
-            levels[pkg._level] = 0
-            pkg._pos = 0
-        nodes.append({"name": pkg.name(), "level": pkg._level, "pos": pkg._pos})
+        pkg.id = ids
+        ids += 1
+        if pkg._level < MAX_LEVEL:
+            nodes.append({"id": pkg.id, "label": pkg._name, "level": pkg._level})
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
-        for dep in pkg.depends():
-            links.append({"from_level": pkg._level, "from_pos": pkg._pos,
-             "to_level": PkgInfo.all_pkgs[dep]._level,
-             "to_pos": PkgInfo.all_pkgs[dep]._pos})
+        if pkg._level < MAX_LEVEL:
+            for dep in pkg._deps:
+                links.append({"from": pkg.id, "to": PkgInfo.all_pkgs[dep].id})
 
     env = jinja2.Environment(loader=jinja2.PackageLoader('pacvis', 'templates'))
     template = env.get_template("index.template.html")
@@ -139,10 +130,10 @@ def test():
     append_message("done")
     for name,pkg in PkgInfo.all_pkgs.items():
         if len(pkg._circledeps)>1:
-            print_message("%s(%s): %s" % (pkg.name(), pkg._circledeps , ", ".join(pkg.depends())))
+            print_message("%s(%s): %s" % (pkg._name, pkg._circledeps , ", ".join(pkg._deps)))
     PkgInfo.topology_sort()
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
-        print("%s(%d): %s" % (pkg.name(), pkg._level , ", ".join(pkg.depends())))
+        print("%s(%d): %s" % (pkg._name, pkg._level , ", ".join(pkg._deps)))
 
 if __name__ == '__main__':
     main()
