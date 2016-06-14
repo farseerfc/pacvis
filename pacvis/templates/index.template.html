@@ -2,7 +2,7 @@
 <!doctype html>
 <html>
 <head>
-  <title>Network | Basic usage</title>
+  <title>PacVis</title>
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css" />
@@ -14,34 +14,17 @@
     }
     .target {
       width: 100vw;
-      height: 10vh;
+      height: 100vh;
       margin: 0 0 0 0;
       padding: 0 0 0 0;
       border: 1px solid lightgray;
     }
-    #target {
-      height: 80vh;
-    }
   </style>
-
-
-
 </head>
 <body>
-
-Packages without dependency and not depended by others:
-<div id="nodeps" class="target"></div>
-
-Dependency Graph:
 <div id="target" class="target"></div>
 
   <script type="text/javascript">
-    var nodeps = new vis.DataSet([
-      {% for node in nodeps %}
-        {id: {{node.id}}, label: '{{node.label}}', level: {{node.level}} },
-      {%- endfor %}
-    ]);
-
     var nodes = new vis.DataSet([
       {% for node in nodes %}
         {id: {{node.id}}, label: '{{node.label}}', level: {{node.level}} },
@@ -104,18 +87,6 @@ Dependency Graph:
       }
     };
     var network = new vis.Network(container, data, options);
-
-    var nodepsnetwork = new vis.Network(
-      document.getElementById('nodeps'),
-      {nodes:nodeps, edges:[]},
-      {
-        nodes: {
-            shape: 'dot',
-        },
-        layout: {
-          hierarchical: true
-        }
-      });
   </script>
 
 </body>

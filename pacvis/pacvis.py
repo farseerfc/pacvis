@@ -26,7 +26,7 @@ class PkgInfo:
         self._pkg = localdb.get_pkg(name)
         self._deps = [resolve_dependency(dep).name for dep in self._pkg.depends]
         self._requiredby = self._pkg.compute_requiredby()
-        self._level = 0
+        self._level = 1
         self._circledeps = []
         PkgInfo.all_pkgs[name] = self
 
@@ -83,6 +83,8 @@ class PkgInfo:
             origin_level = cls.get(pkg)._level
             append_message("%s %d (remaining %d)" % (pkg, origin_level, len(remain_pkgs)))
             if len(cls.get(pkg)._deps) == 0:
+                if len(cls.get(pkg)._requiredby) == 0:
+                    cls.get(pkg)._level = 0
                 continue
             max_level = max(cls.get(x)._level for x in cls.get(pkg)._deps)
             # below is magic
@@ -93,7 +95,7 @@ class PkgInfo:
                     .difference(cls.get(pkg)._circledeps))
 
 
-MAX_LEVEL = 40
+MAX_LEVEL = 3
 
 def main():
     start_message("Loading local database...")
@@ -106,7 +108,6 @@ def main():
 
     print_message("Writing to index.html")
 
-    nodeps = []
     nodes = []
     links = []
 
@@ -114,9 +115,7 @@ def main():
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
         pkg.id = ids
         ids += 1
-        if len(pkg._deps) == 0 and len(pkg._requiredby) == 0:
-            nodeps.append({"id": pkg.id, "label": pkg._name, "level": pkg._level})
-        elif pkg._level < MAX_LEVEL:
+        if pkg._level < MAX_LEVEL:
             nodes.append({"id": pkg.id, "label": pkg._name, "level": pkg._level})
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x._level):
         if pkg._level < MAX_LEVEL:
@@ -126,7 +125,7 @@ def main():
     env = jinja2.Environment(loader=jinja2.PackageLoader('pacvis', 'templates'))
     template = env.get_template("index.template.html")
     with open("index.html", "w") as content:
-        content.write(template.render(nodes=nodes, links=links, nodeps=nodeps))
+        content.write(template.render(nodes=nodes, links=links))
 
 
 def test():
