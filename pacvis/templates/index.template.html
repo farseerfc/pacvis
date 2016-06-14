@@ -12,55 +12,111 @@
       margin: 0 0 0 0;
       padding: 0 0 0 0;
     }
-    #target {
+    .target {
       width: 100vw;
-      height: 100vh;
+      height: 10vh;
       margin: 0 0 0 0;
       padding: 0 0 0 0;
+      border: 1px solid lightgray;
+    }
+    #target {
+      height: 80vh;
     }
   </style>
+
+
+
 </head>
 <body>
-<div id="target"></div>
 
-<script type="text/javascript">
-  // create an array with nodes
-  var nodes = new vis.DataSet([
-    {% for node in nodes %}
-      {id: {{node.id}}, label: '{{node.label}}', level: {{node.level}} },
-    {%- endfor %}
-  ]);
+Packages without dependency and not depended by others:
+<div id="nodeps" class="target"></div>
 
-  // create an array with edges
-  var edges = new vis.DataSet([
-    {% for link in links %}
-      {from: {{link.from}}, to: {{link.to}}, arrows:"to" },
-    {%- endfor %}
-  ]);
+Dependency Graph:
+<div id="target" class="target"></div>
 
-  // create a network
-  var container = document.getElementById('target');
-  var data = {
-    nodes: nodes,
-    edges: edges
-  };
-  var options = {
-    edges: {
-       smooth: {
-           type: 'cubicBezier',
-           forceDirection: 'vertical' ,
-           roundness: 0.4
-       }
-    },
-    layout: {
-       hierarchical: {
-           direction: "UD"
-       }
-    },
-    physics: false
-  };
-  var network = new vis.Network(container, data, options);
-</script>
+  <script type="text/javascript">
+    var nodeps = new vis.DataSet([
+      {% for node in nodeps %}
+        {id: {{node.id}}, label: '{{node.label}}', level: {{node.level}} },
+      {%- endfor %}
+    ]);
+
+    var nodes = new vis.DataSet([
+      {% for node in nodes %}
+        {id: {{node.id}}, label: '{{node.label}}', level: {{node.level}} },
+      {%- endfor %}
+    ]);
+
+
+    var edges = new vis.DataSet([
+      {% for link in links %}
+        {from: {{link.from}}, to: {{link.to}}, arrows:"to" },
+      {%- endfor %}
+    ]);
+
+    // create a network
+    var container = document.getElementById('target');
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+    var options = {
+      nodes: {
+          shape: 'dot',
+      },
+      edges: {
+         smooth: {
+             type: 'cubicBezier',
+             forceDirection: 'vertical' ,
+             roundness: 0.4
+         }
+      },
+      layout: {
+         hierarchical: {
+             direction: "UD",
+             nodeSpacing: 300,
+             treeSpacing: 100,
+         },
+        // repulsion: {
+        //   nodeDistance: 400
+        // },
+        // barnesHut: {
+        //   springLength: 300,
+        //   springConstant: 0.1
+        // },
+        improvedLayout: true
+      },
+      // physics: false
+      physics: {
+        maxVelocity: 10000,
+        // stabilization: true,
+        hierarchicalRepulsion: {
+          nodeDistance: 300,
+          springLength: 300,
+          springConstant: 0.2,
+        },
+        timestep: 0.1,
+        // barnesHut: {
+        //   springLength: 300,
+        //   springConstant: 0.1
+        // },
+      }
+    };
+    var network = new vis.Network(container, data, options);
+
+    var nodepsnetwork = new vis.Network(
+      document.getElementById('nodeps'),
+      {nodes:nodeps, edges:[]},
+      {
+        nodes: {
+            shape: 'dot',
+        },
+        layout: {
+          hierarchical: true
+        }
+      });
+  </script>
 
 </body>
 </html>
