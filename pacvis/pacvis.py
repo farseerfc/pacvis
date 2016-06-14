@@ -29,10 +29,19 @@ class PkgInfo:
         self.requiredby = self.pkg.compute_requiredby()
         self.level = 1
         self.circledeps = []
+        self.explicit = self.pkg.reason == 0
+        self.isize = self.pkg.isize
         PkgInfo.all_pkgs[name] = self
 
     def info(self):
-        return "%s(%d) depends:[%s]" % (self.name, self.level, ", ".join(self.deps))
+        return "%s(%d) depends:[%s] required-by:[%s]" % (
+            self.name,
+            self.level,
+            ", ".join(self.deps),
+            ", ".join(self.requiredby))
+
+    def size(self):
+        return self.isize
 
     @classmethod
     def get(cls, pkg):
@@ -128,7 +137,7 @@ class PkgInfo:
                 continue
             max_level = max(cls.get(x).level for x in cls.get(pkg).deps)
             # below is magic
-            new_level = max_level + math.log(1+ len(cls.get(pkg).deps) + len(cls.get(pkg).requiredby)) + 1
+            new_level = max_level + int(math.log(1+ len(cls.get(pkg).deps) + len(cls.get(pkg).requiredby))) + 1
             if new_level != origin_level:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
@@ -152,7 +161,7 @@ class PkgInfo:
                     .difference(cls.get(pkg).circledeps))
 
 
-class ConsolidatePkg(PkgInfo):
+class ConsolidatePkg:
     def __init__ (self, pkgs):
         self.pkgs = pkgs
         self.deps = pkgs[0].deps
@@ -161,11 +170,17 @@ class ConsolidatePkg(PkgInfo):
         self.level = 1
         self.name = "Group(%d, (%s), (%s))" % ( len(pkgs),
             ",".join(self.deps),
-            ",".join(self.requiredby)
-            )
+            ",".join(self.requiredby))
 
     def info(self):
-        return "Group [%s] (%d) depends:[%s]" % (", ".join(x.name for x in self.pkgs), self.level, ", ".join(self.deps))
+        return "Group [%s] (%d) depends:[%s] required-by:[%s]" % (
+            ", ".join(x.name for x in self.pkgs),
+            self.level,
+            ", ".join(self.deps),
+            ", ".join(self.requiredby))
+
+    def size(self):
+        return sum(pkg.size() for pkg in self.pkgs)
 
 def test_circle_detection():
     start_message("find all packages...")
@@ -181,9 +196,6 @@ def test_circle_detection():
     PkgInfo.topology_sort()
     for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
         print("%s(%d): %s" % (pkg.name, pkg.level , ", ".join(pkg.deps)))
-
-# if _name__ == '__main__':
-#     main()
 
 ### Tornado entry
 
@@ -212,11 +224,19 @@ class MainHandler(tornado.web.RequestHandler):
             pkg.id = ids
             ids += 1
             if pkg.level < MAX_LEVEL:
+                group = "normal"
+                if isinstance(pkg, ConsolidatePkg):
+                    group = "consolidated"
+                elif pkg.level == 0 :
+                    group =  "standalone"
+                elif pkg.explicit:
+                    group = "explicit"
                 nodes.append({"id": pkg.id,
                               "label": pkg.name,
                               "level": pkg.level,
                               "title": pkg.info(),
-                              "group": "consolidated" if isinstance(pkg, ConsolidatePkg) else "standalone" if pkg.level == 0 else "normal"
+                              "size": math.log(pkg.size()+1),
+                              "group": group
                               })
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
             if pkg.level < MAX_LEVEL:
