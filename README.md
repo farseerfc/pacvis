@@ -3,6 +3,8 @@
 Visualize pacman local database using [Vis.js](http://visjs.org/),
 inspired by [pacgraph](http://kmkeen.com/pacgraph/).
 
+See a live demo at https://pacvis.farseerfc.me/ showing database of my arch server.
+
 ![full](screenshots/full.png)
 ![zoomin](screenshots/zoomin.png)
 
