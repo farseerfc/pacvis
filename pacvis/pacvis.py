@@ -7,26 +7,19 @@ import tornado.web
 
 from console import start_message, append_message, print_message
 
-handle = pyalpm.Handle("/","/var/lib/pacman")
-localdb = handle.get_localdb()
-packages = localdb.pkgcache
-
-consolidate_threshold = 3000
-
-def resolve_dependency(dep):
-    pkg = localdb.get_pkg(dep)
-    if pkg is None:
-        pkg = pyalpm.find_satisfier(packages, dep)
-    return pkg
+consolidate_threshold = 3000  # disable consolidate as no need for this
 
 
 class PkgInfo:
     all_pkgs = {}
+    localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
+    packages = localdb.pkgcache
 
     def __init__(self, name):
         self.name = name
-        self.pkg = localdb.get_pkg(name)
-        self.deps = [resolve_dependency(dep).name for dep in self.pkg.depends]
+        self.pkg = PkgInfo.localdb.get_pkg(name)
+        self.deps = [PkgInfo.resolve_dependency(dep).name
+                     for dep in self.pkg.depends]
         self.requiredby = self.pkg.compute_requiredby()
         self.level = 1
         self.circledeps = []
@@ -45,12 +38,19 @@ class PkgInfo:
         return self.isize
 
     @classmethod
+    def resolve_dependency(cls, dep):
+        pkg = cls.localdb.get_pkg(dep)
+        if pkg is None:
+            pkg = pyalpm.find_satisfier(cls.packages, dep)
+        return pkg
+
+    @classmethod
     def get(cls, pkg):
         return cls.all_pkgs[pkg]
 
     @classmethod
     def find_all(cls):
-        for pkg in packages:
+        for pkg in cls.packages:
             PkgInfo(pkg.name)
         return cls.all_pkgs
 
@@ -90,7 +90,7 @@ class PkgInfo:
     @classmethod
     def consolidate(cls):
         depmap = {}
-        for name,pkg in cls.all_pkgs.items():
+        for name, pkg in cls.all_pkgs.items():
             deps = tuple(sorted(pkg.deps))
             reqs = tuple(sorted(pkg.requiredby))
             key = (deps, reqs)
@@ -99,7 +99,7 @@ class PkgInfo:
             else:
                 depmap[key] = [pkg]
         start_message("Consolidating ")
-        for key,pkgs in depmap.items():
+        for key, pkgs in depmap.items():
             if len(pkgs) > consolidate_threshold:
                 consolidated = ConsolidatePkg(pkgs)
                 for pkg in pkgs:
@@ -131,24 +131,30 @@ class PkgInfo:
         while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
             origin_level = cls.get(pkg).level
-            append_message("%s %d (remaining %d)" % (pkg, origin_level, len(remain_pkgs)))
+            append_message("%s %d (remaining %d)" % (pkg,
+                                                     origin_level,
+                                                     len(remain_pkgs)))
             if len(cls.get(pkg).deps) == 0:
                 if len(cls.get(pkg).requiredby) == 0:
                     cls.get(pkg).level = 0
                 continue
-            max_level = max(cls.get(x).level for x in cls.get(pkg).deps)
+            max_level = max(cls.get(x).level for x in cls.get(pkg).deps) + 1
             # below is magic
-            new_level = max_level + int(math.log(1+ len(cls.get(pkg).deps) + len(cls.get(pkg).requiredby))) + 1
+            new_level = max_level + int(math.log(1 +
+                                                 len(cls.get(pkg).deps) +
+                                                 len(cls.get(pkg).requiredby)))
             if new_level != origin_level:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
-                    .difference(cls.get(pkg).circledeps))
+                                   .difference(cls.get(pkg).circledeps))
         remain_pkgs = {x for x in cls.all_pkgs}
         start_message("Resorting ")
         while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
             origin_level = cls.get(pkg).level
-            append_message("%s %d (remaining %d)" % (pkg, origin_level, len(remain_pkgs)))
+            append_message("%s %d (remaining %d)" % (pkg,
+                                                     origin_level,
+                                                     len(remain_pkgs)))
             if len(cls.get(pkg).requiredby) == 0:
                 if len(cls.get(pkg).deps) == 0:
                     cls.get(pkg).level = 0
@@ -159,19 +165,20 @@ class PkgInfo:
             if new_level > origin_level:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).deps)
-                    .difference(cls.get(pkg).circledeps))
+                                   .difference(cls.get(pkg).circledeps))
+        start_message("Minimizing levels")
 
 
 class ConsolidatePkg:
-    def __init__ (self, pkgs):
+    def __init__(self, pkgs):
         self.pkgs = pkgs
         self.deps = pkgs[0].deps
         self.requiredby = pkgs[0].requiredby
         self.circledeps = []
         self.level = 1
-        self.name = "Group(%d, (%s), (%s))" % ( len(pkgs),
-            ",".join(self.deps),
-            ",".join(self.requiredby))
+        self.name = "Group(%d, (%s), (%s))" % (len(pkgs),
+                                               ",".join(self.deps),
+                                               ",".join(self.requiredby))
 
     def info(self):
         return "Group [%s] (%d) depends:[%s] required-by:[%s]" % (
@@ -183,6 +190,7 @@ class ConsolidatePkg:
     def size(self):
         return sum(pkg.size() for pkg in self.pkgs)
 
+
 def test_circle_detection():
     start_message("find all packages...")
     PkgInfo.find_all()
@@ -190,20 +198,22 @@ def test_circle_detection():
     start_message("find all dependency circles...")
     PkgInfo.find_circles()
     append_message("done")
-    for name,pkg in PkgInfo.all_pkgs.items():
+    for name, pkg in PkgInfo.all_pkgs.items():
         if len(pkg.circledeps) > 1:
             print_message("%s(%s): %s" %
-                (pkg.name, pkg.circledeps , ", ".join(pkg.deps)))
+                          (pkg.name, pkg.circledeps, ", ".join(pkg.deps)))
     PkgInfo.topology_sort()
-    for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
-        print("%s(%d): %s" % (pkg.name, pkg.level , ", ".join(pkg.deps)))
+    for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
+        print("%s(%d): %s" % (pkg.name, pkg.level, ", ".join(pkg.deps)))
 
-### Tornado entry
 
+# Tornado entry
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        MAX_LEVEL = int(self.get_argument("maxlevel", "30"))
+        MAX_LEVEL = int(self.get_argument("maxlevel", "1000"))
         PkgInfo.all_pkgs = {}
+        PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
+        PkgInfo.packages = PkgInfo.localdb.pkgcache
         print_message("Max level: %d" % MAX_LEVEL)
         start_message("Loading local database...")
         PkgInfo.find_all()
@@ -221,15 +231,15 @@ class MainHandler(tornado.web.RequestHandler):
         links = []
 
         ids = 0
-        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
+        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
             pkg.id = ids
             ids += 1
             if pkg.level < MAX_LEVEL:
                 group = "normal"
                 if isinstance(pkg, ConsolidatePkg):
                     group = "consolidated"
-                elif pkg.level == 0 :
-                    group =  "standalone"
+                elif pkg.level == 0:
+                    group = "standalone"
                 elif pkg.explicit:
                     group = "explicit"
                 nodes.append({"id": pkg.id,
@@ -242,20 +252,24 @@ class MainHandler(tornado.web.RequestHandler):
                               "deps": ", ".join(pkg.deps),
                               "reqs": ", ".join(pkg.requiredby),
                               })
-        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
+        for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
             if pkg.level < MAX_LEVEL:
                 for dep in pkg.deps:
-                    links.append({"from": pkg.id, "to": PkgInfo.all_pkgs[dep].id})
+                    links.append({"from": pkg.id,
+                                  "to": PkgInfo.all_pkgs[dep].id})
 
         self.render("templates/index.template.html", nodes=nodes, links=links)
+
 
 def make_app():
     import os
     return tornado.web.Application([
         (r"/", MainHandler),
-    ], debug=True, static_path= os.path.join(os.path.dirname(__file__), "static"))
+        ], debug=True,
+        static_path=os.path.join(os.path.dirname(__file__), "static"))
 
 if __name__ == "__main__":
     app = make_app()
     app.listen(8888)
+    print_message("Start PacVis at http://localhost:8888/")
     tornado.ioloop.IOLoop.current().start()
