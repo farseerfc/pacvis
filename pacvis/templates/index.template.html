@@ -92,9 +92,9 @@
       layout: {
          hierarchical: {
              direction: "UD",
-             nodeSpacing: Math.floor(Math.sqrt(nodes.length)*20),
+             nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
              treeSpacing: 50,
-             levelSeparation: Math.floor(Math.sqrt(nodes.length)*10),
+             levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*50),
              blockShifting: false,
              edgeMinimization: false,
              parentCentralization: false
@@ -105,15 +105,15 @@
       physics: {
         maxVelocity: 100,
         hierarchicalRepulsion: {
-          nodeDistance: Math.floor(Math.sqrt(nodes.length)*20),
-          springLength: Math.floor(Math.sqrt(nodes.length)),
+          nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
+          springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))),
           springConstant: 0.5,
           damping: 0.1
         },
         timestep: 0.1,
         stabilization: {
-          iterations: 10000,
-          updateInterval: 100,
+          iterations: 5000,
+          updateInterval: 50,
         }
       }
     };

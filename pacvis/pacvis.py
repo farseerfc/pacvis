@@ -141,10 +141,10 @@ class PkgInfo:
                 continue
             max_level = max(cls.get(x).level for x in cls.get(pkg).deps) + 1
             # below is magic
-            # new_level = max_level + int(math.log(1 +
-            #                                      len(cls.get(pkg).deps) +
-            #                                      len(cls.get(pkg).requiredby)))
-            new_level = max_level  # we may not need magic at all
+            new_level = max_level + int(math.log(1 +
+                                                 len(cls.get(pkg).deps) +
+                                                 len(cls.get(pkg).requiredby)))
+            # new_level = max_level  # we may not need magic at all
             if new_level != origin_level:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
