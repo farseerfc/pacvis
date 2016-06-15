@@ -12,23 +12,49 @@
       padding: 0 0 0 0;
     }
     .target {
-      width: 100vw;
+      width: 70vw;
       height: 100vh;
       margin: 0 0 0 0;
       padding: 0 0 0 0;
+    }
+    .panel{
+      position: fixed;
+      top: 0;
+      left: 70vw;
+      width: 30vw;
+      height: 100vh;
+      margin: 0 0 0 0;
+      background-color: #ccc;
+      padding: 30px 30px 30px 30px;
     }
   </style>
 </head>
 <body>
 <div id="target" class="target"></div>
+<div id="panel" class="panel">
+  <h1 id="title"></h1>
+  <h2 id="pkgname"></h2>
+  <div id="pkgisize"></div>
+  <div id="pkgdeps"></div>
+  <div id="pkgreqs"></div>
+</div>
 
   <script type="text/javascript">
     var nodes = new vis.DataSet([
       {% for node in nodes %}
-        {id: {{node["id"]}} , label: '{{node["label"]}}', level: {{node["level"]}}, group: '{{node["group"]}}', title:'{{node["title"]}}', value:'{{node["size"]}}'},
+        {
+          id:    {{node["id"]}} ,
+          label: '{{node["label"]}}',
+          level: {{node["level"]}},
+          group: '{{node["group"]}}',
+          title: '{{node["title"]}}',
+          value: {{node["value"]}},
+          isize: '{{node["isize"]}}',
+          deps:  '{{node["deps"]}}',
+          reqs:  '{{node["reqs"]}}',
+        },
       {% end %}
     ]);
-
 
     var edges = new vis.DataSet([
       {% for link in links %}
@@ -51,27 +77,24 @@
       },
       nodes: {
         scaling: {
-          // customScalingFunction: function (min,max,total,value) {
-          //   return value/total;
-          // },
           min: 1,
-          max: 30,
+          max: 50,
         }
       },
       edges: {
          smooth: {
-             type: 'horizontal',
-            //  forceDirection: 'vertical' ,
-            //  roundness: 0.4
+             type: 'cubicBezier',
+             forceDirection: 'vertical' ,
+             roundness: 0.4
          },
          arrows: {to : true }
       },
       layout: {
          hierarchical: {
              direction: "UD",
-             nodeSpacing: 500,
-             treeSpacing: 100,
-             levelSeparation: 300,
+             nodeSpacing: Math.floor(Math.sqrt(nodes.length)*20),
+             treeSpacing: 50,
+             levelSeparation: Math.floor(Math.sqrt(nodes.length)*10),
              blockShifting: false,
              edgeMinimization: false,
              parentCentralization: false
@@ -82,37 +105,65 @@
       physics: {
         maxVelocity: 100,
         hierarchicalRepulsion: {
-          nodeDistance: 500,
-          springLength: 400,
-          springConstant: 0.2,
+          nodeDistance: Math.floor(Math.sqrt(nodes.length)*20),
+          springLength: Math.floor(Math.sqrt(nodes.length)),
+          springConstant: 0.5,
           damping: 0.1
         },
-        // barnesHut: {
-        //   gravitationalConstant: -100000,
-        //   springLength: 200,
-        //   springConstant: 0.1,
-        //   avoidOverlap: 0.5
-        // },
-        // repulsion: {
-        //   nodeDistance: 400,
-        //   springLength: 200,
-        // },
         timestep: 0.1,
         stabilization: {
-          iterations: 5000,
+          iterations: 10000,
           updateInterval: 100,
         }
       }
     };
+
+
     var network = new vis.Network(container, data, options);
+
+    function filesize(size) {
+      var units = "KMGT";
+      var left = size;
+      var unit = -1;
+      for (; left > 1100 && unit < 3; unit++) {
+        left /= 1024;
+      }
+      if (unit === -1) {
+        return size+"B";
+      } else {
+        if (size < 0) left = -left;
+        return Math.round(left * 100) / 100 + units[unit] + "iB";
+      }
+    }
+
     network.on("startStabilizing", function (params) {
       document.title = 'PacVis | ';
+      document.getElementById("title").innerHTML = "Layouting ...";
     });
     network.on("stabilizationProgress", function (params) {
       document.title = 'PacVis | ' +  Math.round(params.iterations/params.total*100) + "%";
+      document.getElementById("title").innerHTML = "Layouting ... " + Math.round(params.iterations/params.total*100) + "%";
     });
     network.on("stabilizationIterationsDone", function (params) {
       document.title = 'PacVis';
+      document.getElementById("title").innerHTML = "PacVis";
+    });
+    network.on("stabilized", function (params) {
+      document.title = 'PacVis';
+      document.getElementById("title").innerHTML = "PacVis";
+    });
+    network.on("selectNode", function (params) {
+        let node = nodes.get(params.nodes[0]);
+        document.getElementById("pkgname").innerHTML = node.label;
+        document.getElementById("pkgisize").innerHTML = "Installed size: "+ filesize(node.isize);
+        document.getElementById("pkgdeps").innerHTML = "Depends: "+ node.deps;
+        document.getElementById("pkgreqs").innerHTML = "Required by: "+ node.reqs;
+    });
+    network.on("deselectNode", function (params) {
+      document.getElementById("pkgname").innerHTML = "";
+      document.getElementById("pkgisize").innerHTML = "";
+      document.getElementById("pkgdeps").innerHTML = "";
+      document.getElementById("pkgreqs").innerHTML = "";
     });
   </script>
 

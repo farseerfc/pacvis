@@ -236,8 +236,11 @@ class MainHandler(tornado.web.RequestHandler):
                               "label": pkg.name,
                               "level": pkg.level,
                               "title": pkg.info(),
-                              "size": math.log(pkg.size()+1),
-                              "group": group
+                              "value": math.log(pkg.size()+1)*2,
+                              "group": group,
+                              "isize": pkg.size(),
+                              "deps": ", ".join(pkg.deps),
+                              "reqs": ", ".join(pkg.requiredby),
                               })
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x:x.level):
             if pkg.level < MAX_LEVEL:
