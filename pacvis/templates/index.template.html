@@ -137,8 +137,8 @@
     }
 
     network.on("startStabilizing", function (params) {
-      document.title = 'PacVis | ';
-      document.getElementById("title").innerHTML = "Layouting ...";
+      document.title = 'PacVis';
+      document.getElementById("title").innerHTML = "PacVis";
     });
     network.on("stabilizationProgress", function (params) {
       document.title = 'PacVis | ' +  Math.round(params.iterations/params.total*100) + "%";

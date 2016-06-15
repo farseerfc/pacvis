@@ -1,5 +1,6 @@
 import math
 import random
+from itertools import groupby
 
 import pyalpm
 import tornado.ioloop
@@ -140,9 +141,10 @@ class PkgInfo:
                 continue
             max_level = max(cls.get(x).level for x in cls.get(pkg).deps) + 1
             # below is magic
-            new_level = max_level + int(math.log(1 +
-                                                 len(cls.get(pkg).deps) +
-                                                 len(cls.get(pkg).requiredby)))
+            # new_level = max_level + int(math.log(1 +
+            #                                      len(cls.get(pkg).deps) +
+            #                                      len(cls.get(pkg).requiredby)))
+            new_level = max_level  # we may not need magic at all
             if new_level != origin_level:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
@@ -160,13 +162,19 @@ class PkgInfo:
                     cls.get(pkg).level = 0
                 continue
             min_level = min(cls.get(x).level for x in cls.get(pkg).requiredby)
-            # below is magic
             new_level = min_level - 1
             if new_level > origin_level:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).deps)
                                    .difference(cls.get(pkg).circledeps))
-        start_message("Minimizing levels")
+        start_message("Minimizing levels ...")
+        pkgs = list(sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level))
+        nextlevel = 0
+        for key, group in groupby(pkgs, key=lambda x: x.level):
+            for pkg in group:
+                pkg.level = nextlevel
+            nextlevel += 1
+        append_message("max level: " + nextlevel)
 
 
 class ConsolidatePkg:
@@ -215,17 +223,17 @@ class MainHandler(tornado.web.RequestHandler):
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache
         print_message("Max level: %d" % MAX_LEVEL)
-        start_message("Loading local database...")
+        start_message("Loading local database ...")
         PkgInfo.find_all()
         append_message("done")
         append_message("done")
-        start_message("Finding all dependency circles...")
+        start_message("Finding all dependency circles ... ")
         PkgInfo.find_circles()
         append_message("done")
         PkgInfo.consolidate()
         PkgInfo.topology_sort()
 
-        print_message("Rendering")
+        print_message("Rendering into HTML template")
 
         nodes = []
         links = []
