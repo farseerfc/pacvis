@@ -167,14 +167,14 @@ class PkgInfo:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).deps)
                                    .difference(cls.get(pkg).circledeps))
-        start_message("Minimizing levels ...")
+        start_message("Minimizing levels ... ")
         pkgs = list(sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level))
         nextlevel = 0
         for key, group in groupby(pkgs, key=lambda x: x.level):
             for pkg in group:
                 pkg.level = nextlevel
             nextlevel += 1
-        append_message("max level: " + nextlevel)
+        append_message("max available level: %d" % nextlevel)
 
 
 class ConsolidatePkg:
