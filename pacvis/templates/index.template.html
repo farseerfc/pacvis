@@ -78,7 +78,7 @@
       },
       nodes: {
         scaling: {
-          min: 10,
+          min: 5,
           max: 50,
         }
       },
@@ -93,7 +93,7 @@
       layout: {
          hierarchical: {
              direction: "UD",
-             nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
+             nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
              treeSpacing: 50,
              levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*50),
              blockShifting: false,
@@ -104,11 +104,11 @@
       },
       // physics: false,
       physics: {
-        maxVelocity: 100,
+        maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
         hierarchicalRepulsion: {
-          nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
-          springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))),
-          springConstant: 0.5,
+          nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+          springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*80),
+          springConstant: 1,
           damping: 0.1
         },
         timestep: 0.1,
@@ -137,6 +137,8 @@
       }
     }
 
+var debug_performance = false;
+
     network.on("startStabilizing", function (params) {
       document.title = 'PacVis';
       document.getElementById("title").innerHTML = "PacVis";
@@ -147,11 +149,19 @@
     });
     network.on("stabilizationIterationsDone", function (params) {
       document.title = 'PacVis';
-      document.getElementById("title").innerHTML = "PacVis";
+      if(debug_performance){
+        document.getElementById("title").innerHTML = "PacVis | loaded in: " + window.performance.now()/1000 ;
+      }else{
+        document.getElementById("title").innerHTML = "PacVis";
+      }
     });
     network.on("stabilized", function (params) {
       document.title = 'PacVis';
-      document.getElementById("title").innerHTML = "PacVis";
+      if(debug_performance){
+        document.getElementById("title").innerHTML = "PacVis | loaded in: " + window.performance.now()/1000 ;
+      }else{
+        document.getElementById("title").innerHTML = "PacVis";
+      }
     });
     network.on("selectNode", function (params) {
         let node = nodes.get(params.nodes[0]);
