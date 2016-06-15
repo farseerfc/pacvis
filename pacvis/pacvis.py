@@ -226,11 +226,10 @@ class MainHandler(tornado.web.RequestHandler):
         start_message("Loading local database ...")
         PkgInfo.find_all()
         append_message("done")
-        append_message("done")
         start_message("Finding all dependency circles ... ")
         PkgInfo.find_circles()
         append_message("done")
-        PkgInfo.consolidate()
+        # PkgInfo.consolidate()
         PkgInfo.topology_sort()
 
         print_message("Rendering into HTML template")
