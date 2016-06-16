@@ -8,8 +8,6 @@ import tornado.web
 
 from console import start_message, append_message, print_message
 
-consolidate_threshold = 3000  # disable consolidate as no need for this
-
 
 class PkgInfo:
     all_pkgs = {}
@@ -27,13 +25,6 @@ class PkgInfo:
         self.explicit = self.pkg.reason == 0
         self.isize = self.pkg.isize
         PkgInfo.all_pkgs[name] = self
-
-    # def info(self):
-    #     return "%s(%d) depends:[%s] required-by:[%s]" % (
-    #         self.name,
-    #         self.level,
-    #         ", ".join(self.deps),
-    #         ", ".join(self.requiredby))
 
     def size(self):
         return self.isize
@@ -89,43 +80,6 @@ class PkgInfo:
                 strongconnect(pkg)
 
     @classmethod
-    def consolidate(cls):
-        depmap = {}
-        for name, pkg in cls.all_pkgs.items():
-            deps = tuple(sorted(pkg.deps))
-            reqs = tuple(sorted(pkg.requiredby))
-            key = (deps, reqs)
-            if key in depmap:
-                depmap[key].append(pkg)
-            else:
-                depmap[key] = [pkg]
-        start_message("Consolidating ")
-        for key, pkgs in depmap.items():
-            if len(pkgs) > consolidate_threshold:
-                consolidated = ConsolidatePkg(pkgs)
-                for pkg in pkgs:
-                    append_message("remove "+pkg.name)
-                    cls.all_pkgs.pop(pkg.name)
-                    for dep in consolidated.deps:
-                        if pkg.name in cls.all_pkgs[dep].requiredby:
-                            cls.all_pkgs[dep].requiredby.remove(pkg.name)
-                    for dep in consolidated.requiredby:
-                        if pkg.name in cls.all_pkgs[dep].deps:
-                            cls.all_pkgs[dep].deps.remove(pkg.name)
-                cls.all_pkgs[consolidated.name] = consolidated
-                for dep in consolidated.deps:
-                    cls.all_pkgs[dep].requiredby.append(consolidated.name)
-                for dep in consolidated.requiredby:
-                    cls.all_pkgs[dep].deps.append(consolidated.name)
-                append_message("add " + consolidated.name)
-                append_message("Packages: [%s] deps: [%s] reqs: [%s]" % (
-                    ", ".join(pkg.name for pkg in pkgs),
-                    ", ".join(consolidated.deps),
-                    ", ".join(consolidated.requiredby)
-                    ))
-        append_message("... done")
-
-    @classmethod
     def topology_sort(cls):
         remain_pkgs = {x for x in cls.all_pkgs}
         start_message("Sorting ")
@@ -177,28 +131,6 @@ class PkgInfo:
         append_message("max available level: %d" % nextlevel)
 
 
-class ConsolidatePkg:
-    def __init__(self, pkgs):
-        self.pkgs = pkgs
-        self.deps = pkgs[0].deps
-        self.requiredby = pkgs[0].requiredby
-        self.circledeps = []
-        self.level = 1
-        self.name = "Group(%d, (%s), (%s))" % (len(pkgs),
-                                               ",".join(self.deps),
-                                               ",".join(self.requiredby))
-
-    def info(self):
-        return "Group [%s] (%d) depends:[%s] required-by:[%s]" % (
-            ", ".join(x.name for x in self.pkgs),
-            self.level,
-            ", ".join(self.deps),
-            ", ".join(self.requiredby))
-
-    def size(self):
-        return sum(pkg.size() for pkg in self.pkgs)
-
-
 def test_circle_detection():
     start_message("find all packages...")
     PkgInfo.find_all()
@@ -229,7 +161,6 @@ class MainHandler(tornado.web.RequestHandler):
         start_message("Finding all dependency circles ... ")
         PkgInfo.find_circles()
         append_message("done")
-        # PkgInfo.consolidate()
         PkgInfo.topology_sort()
 
         print_message("Rendering into HTML template")
@@ -243,16 +174,13 @@ class MainHandler(tornado.web.RequestHandler):
             ids += 1
             if pkg.level < MAX_LEVEL:
                 group = "normal"
-                if isinstance(pkg, ConsolidatePkg):
-                    group = "consolidated"
-                elif pkg.level == 0:
+                if pkg.level == 0:
                     group = "standalone"
                 elif pkg.explicit:
                     group = "explicit"
                 nodes.append({"id": pkg.id,
                               "label": pkg.name,
                               "level": pkg.level,
-                            #   "title": pkg.info(),
                               "value": math.log(pkg.size()+1)*2,
                               "group": group,
                               "isize": pkg.size(),
