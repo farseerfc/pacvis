@@ -17,7 +17,7 @@
       margin: 0 0 0 0;
       padding: 0 0 0 0;
     }
-    .panel{
+    .leftpanel{
       position: fixed;
       top: 0;
       left: 70vw;
@@ -25,39 +25,69 @@
       height: 100vh;
       margin: 0 0 0 0;
       background-color: #ccc;
-      padding: 30px 30px 30px 30px;
+      overflow-y: auto;
+    }
+    .panel{
+      margin: 30px;
       font-family: monospace;
     }
   </style>
 </head>
 <body>
 <div id="target" class="target"></div>
-<div id="panel" class="panel">
-  <h1 id="title"></h1>
-  <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
-  <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()"></input>
-  <h2 id="pkgname"></h2>
-  <div id="pkgisize"></div>
-  <div id="pkgdeps"></div>
-  <div id="pkgreqs"></div>
+<div class="leftpanel">
+  <div id="panel" class="panel">
+    <h1 id="title">Loading ...</h1>
+    <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
+    <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()"></input>
+    <h2 id="pkgname"></h2>
+    <div id="pkgisize"></div>
+    <div id="pkgdeps"></div>
+    <div id="pkgreqs"></div>
+  </div>
 </div>
 
   <script type="text/javascript">
-    var nodes = new vis.DataSet([
+
+    function filesize(size) {
+      var units = "KMGT";
+      var left = size;
+      var unit = -1;
+      for (; left > 1100 && unit < 3; unit++) {
+        left /= 1024;
+      }
+      if (unit === -1) {
+        return size+"B";
+      } else {
+        if (size < 0) left = -left;
+        return Math.round(left * 100) / 100 + units[unit] + "iB";
+      }
+    }
+
+    var nodedata = [
       {% for node in nodes %}
         {
           id:    {{node["id"]}} ,
           label: '{{node["label"]}}',
           level: {{node["level"]}},
           group: '{{node["group"]}}',
-          title: '{{node["title"]}}',
           value: {{node["value"]}},
           isize: '{{node["isize"]}}',
           deps:  '{{node["deps"]}}',
           reqs:  '{{node["reqs"]}}',
         },
       {% end %}
-    ]);
+    ];
+
+    for(let nodeid in nodedata){
+      let node = nodedata[nodeid];
+      node.title = "<h4>" + node.label + "</h4>" +
+        "<p>installed size: " + filesize(node.isize) + "</p>" +
+        "<p>depends: [" + node.deps + "]</p>" +
+        "<p>required by:[" + node.reqs +"]</p>";
+    }
+
+    var nodes = new vis.DataSet(nodedata);
 
     var edges = new vis.DataSet([
       {% for link in links %}
@@ -124,21 +154,6 @@
 
     var network = new vis.Network(container, data, options);
 
-    function filesize(size) {
-      var units = "KMGT";
-      var left = size;
-      var unit = -1;
-      for (; left > 1100 && unit < 3; unit++) {
-        left /= 1024;
-      }
-      if (unit === -1) {
-        return size+"B";
-      } else {
-        if (size < 0) left = -left;
-        return Math.round(left * 100) / 100 + units[unit] + "iB";
-      }
-    }
-
 var debug_performance = false;
 
     network.on("startStabilizing", function (params) {
@@ -175,11 +190,20 @@ var debug_performance = false;
       document.getElementById("pkgreqs").innerHTML = "";
     });
 
+    function createPkgListDom(list){
+      let depsdom = "";
+      if(list=="") return "";
+      for(let dep of list.split(", ")){
+        depsdom += "<button onclick='document.getElementById(\"search\").value=\"" + dep + "\";trysearch()'>" + dep +"</button>";
+      }
+      return depsdom;
+    }
+
     function selectPkg(node){
       document.getElementById("pkgname").innerHTML = node.label;
       document.getElementById("pkgisize").innerHTML = "Installed size: "+ filesize(node.isize);
-      document.getElementById("pkgdeps").innerHTML = "Depends: "+ node.deps;
-      document.getElementById("pkgreqs").innerHTML = "Required by: "+ node.reqs;
+      document.getElementById("pkgdeps").innerHTML = "Depends: " + createPkgListDom(node.deps);
+      document.getElementById("pkgreqs").innerHTML = "Required by: "+ createPkgListDom(node.reqs);
     }
 
     function trysearch(){
@@ -189,7 +213,7 @@ var debug_performance = false;
             network.selectNodes([node.id]);
             selectPkg(node);
             network.focus(node.id, {
-              scale: Math.log(nodes.length)/3,
+              scale: Math.log(nodes.length)/5,
               locked: false,
               animation: true});
           }

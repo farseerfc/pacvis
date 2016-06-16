@@ -28,12 +28,12 @@ class PkgInfo:
         self.isize = self.pkg.isize
         PkgInfo.all_pkgs[name] = self
 
-    def info(self):
-        return "%s(%d) depends:[%s] required-by:[%s]" % (
-            self.name,
-            self.level,
-            ", ".join(self.deps),
-            ", ".join(self.requiredby))
+    # def info(self):
+    #     return "%s(%d) depends:[%s] required-by:[%s]" % (
+    #         self.name,
+    #         self.level,
+    #         ", ".join(self.deps),
+    #         ", ".join(self.requiredby))
 
     def size(self):
         return self.isize
@@ -252,7 +252,7 @@ class MainHandler(tornado.web.RequestHandler):
                 nodes.append({"id": pkg.id,
                               "label": pkg.name,
                               "level": pkg.level,
-                              "title": pkg.info(),
+                            #   "title": pkg.info(),
                               "value": math.log(pkg.size()+1)*2,
                               "group": group,
                               "isize": pkg.size(),
