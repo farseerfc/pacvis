@@ -26,6 +26,7 @@
       margin: 0 0 0 0;
       background-color: #ccc;
       padding: 30px 30px 30px 30px;
+      font-family: monospace;
     }
   </style>
 </head>
@@ -34,6 +35,7 @@
 <div id="panel" class="panel">
   <h1 id="title"></h1>
   <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
+  <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()"></input>
   <h2 id="pkgname"></h2>
   <div id="pkgisize"></div>
   <div id="pkgdeps"></div>
@@ -164,11 +166,7 @@ var debug_performance = false;
       }
     });
     network.on("selectNode", function (params) {
-        let node = nodes.get(params.nodes[0]);
-        document.getElementById("pkgname").innerHTML = node.label;
-        document.getElementById("pkgisize").innerHTML = "Installed size: "+ filesize(node.isize);
-        document.getElementById("pkgdeps").innerHTML = "Depends: "+ node.deps;
-        document.getElementById("pkgreqs").innerHTML = "Required by: "+ node.reqs;
+        selectPkg(nodes.get(params.nodes[0]));
     });
     network.on("deselectNode", function (params) {
       document.getElementById("pkgname").innerHTML = "";
@@ -176,6 +174,27 @@ var debug_performance = false;
       document.getElementById("pkgdeps").innerHTML = "";
       document.getElementById("pkgreqs").innerHTML = "";
     });
+
+    function selectPkg(node){
+      document.getElementById("pkgname").innerHTML = node.label;
+      document.getElementById("pkgisize").innerHTML = "Installed size: "+ filesize(node.isize);
+      document.getElementById("pkgdeps").innerHTML = "Depends: "+ node.deps;
+      document.getElementById("pkgreqs").innerHTML = "Required by: "+ node.reqs;
+    }
+
+    function trysearch(){
+        let pkgname = document.getElementById("search").value;
+        for(let node of nodes.get()){
+          if(node.label == pkgname){
+            network.selectNodes([node.id]);
+            selectPkg(node);
+            network.focus(node.id, {
+              scale: Math.log(nodes.length)/3,
+              locked: false,
+              animation: true});
+          }
+        }
+    }
   </script>
 
 </body>

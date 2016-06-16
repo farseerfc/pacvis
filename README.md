@@ -36,6 +36,6 @@ issue with a modified vis.js.
 - [ ] we need to estimate removable size (by `pacman -Rcs`)
 - [ ] performance for layout algorithm can be improved
 - [ ] more information from pacman can be intergrated
-- [ ] search by package name
+- [x] search by package name
 - [ ] show only part of the packages (like `pactree`) instead of filtering by levels
 - [ ] be visually attractive!
