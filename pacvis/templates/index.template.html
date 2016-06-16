@@ -37,11 +37,12 @@
 <div id="target" class="target"></div>
 <div class="leftpanel">
   <div id="panel" class="panel">
-    <h1 id="title">Loading ...</h1>
+    <h1 id="title">If you see this, your CPU may be too weak ...</h1>
     <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
     <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()"></input>
     <h2 id="pkgname"></h2>
     <div id="pkgisize"></div>
+    <div id="pkgreason"></div>
     <div id="pkgdeps"></div>
     <div id="pkgreqs"></div>
   </div>
@@ -186,6 +187,7 @@ var debug_performance = false;
     network.on("deselectNode", function (params) {
       document.getElementById("pkgname").innerHTML = "";
       document.getElementById("pkgisize").innerHTML = "";
+      document.getElementById("pkgreason").innerHTML = "";
       document.getElementById("pkgdeps").innerHTML = "";
       document.getElementById("pkgreqs").innerHTML = "";
     });
@@ -202,6 +204,8 @@ var debug_performance = false;
     function selectPkg(node){
       document.getElementById("pkgname").innerHTML = node.label;
       document.getElementById("pkgisize").innerHTML = "Installed size: "+ filesize(node.isize);
+      let reason = node.group == "normal" ? "as a dependency" : "explicitly";
+      document.getElementById("pkgreason").innerHTML = "Install reason: " + reason;
       document.getElementById("pkgdeps").innerHTML = "Depends: " + createPkgListDom(node.deps);
       document.getElementById("pkgreqs").innerHTML = "Required by: "+ createPkgListDom(node.reqs);
     }
