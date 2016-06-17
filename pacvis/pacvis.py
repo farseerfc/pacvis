@@ -181,7 +181,6 @@ class MainHandler(tornado.web.RequestHandler):
                 nodes.append({"id": pkg.id,
                               "label": pkg.name,
                               "level": pkg.level,
-                              "value": math.log(pkg.size()+1)*2,
                               "group": group,
                               "isize": pkg.size(),
                               "deps": ", ".join(pkg.deps),
