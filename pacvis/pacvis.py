@@ -32,8 +32,6 @@ class PkgInfo:
         self.isize = self.pkg.isize
         PkgInfo.all_pkgs[name] = self
 
-    def size(self):
-        return self.isize
 
     @classmethod
     def resolve_dependency(cls, dep):
@@ -136,6 +134,59 @@ class PkgInfo:
             nextlevel += 1
         append_message("max available level: %d" % nextlevel)
 
+    @classmethod
+    def calcCSize(cls, pkg):
+        removing_pkg = set()
+
+        def remove_pkg(pkgname):
+            nonlocal removing_pkg
+            removing_pkg.add(pkgname)
+            for dep in cls.all_pkgs[pkgname].requiredby:
+                if dep not in removing_pkg:
+                    remove_pkg(dep)
+
+        remove_pkg(pkg.name)
+        pkg.csize = sum(cls.all_pkgs[pkg].isize for pkg in removing_pkg)
+        append_message("csize %s: %d" % (pkg.name, pkg.csize))
+        return pkg.csize
+
+    @classmethod
+    def calcCsSize(cls, pkg):
+        removing_pkg = set()
+        analyzing_pkg = set()
+
+        def remove_pkg(pkgname):
+            nonlocal removing_pkg
+            removing_pkg.add(pkgname)
+            for dep in cls.all_pkgs[pkgname].deps:
+                if not cls.all_pkgs[dep].explicit:
+                    analyzing_pkg.add(dep)
+            for dep in cls.all_pkgs[pkgname].requiredby:
+                if dep not in removing_pkg:
+                    remove_pkg(dep)
+
+        remove_pkg(pkg.name)
+        while len(analyzing_pkg)>0:
+            apkg = cls.all_pkgs[analyzing_pkg.pop()]
+            if apkg.name in removing_pkg:
+                continue
+            if all(dep in removing_pkg for dep in apkg.requiredby):
+                remove_pkg(apkg.name)
+        pkg.cssize = sum(cls.all_pkgs[pkg].isize for pkg in removing_pkg)
+        append_message("cssize %s: %d" % (pkg.name, pkg.cssize))
+        return pkg.cssize
+
+
+    @classmethod
+    def calcSizes(cls):
+        start_message("Calculating csize ... ")
+        maxCSize = max(cls.calcCSize(pkg) for pkg in cls.all_pkgs.values())
+        print_message("Max cSize: " + str(maxCSize))
+        start_message("Calculating cssize ... ")
+        maxCsSize = max(cls.calcCsSize(pkg) for pkg in cls.all_pkgs.values())
+        print_message("Max csSize: " + str(maxCsSize))
+
+
 
 def test_circle_detection():
     start_message("find all packages...")
@@ -168,14 +219,16 @@ class MainHandler(tornado.web.RequestHandler):
         PkgInfo.find_circles()
         append_message("done")
         PkgInfo.topology_sort()
+        PkgInfo.calcSizes()
 
-        print_message("Rendering into HTML template")
+        start_message("Rendering ... ")
 
         nodes = []
         links = []
 
         ids = 0
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
+            append_message("%s" % pkg.name)
             pkg.id = ids
             ids += 1
             if pkg.level < MAX_LEVEL:
@@ -188,7 +241,9 @@ class MainHandler(tornado.web.RequestHandler):
                               "label": pkg.name,
                               "level": pkg.level,
                               "group": group,
-                              "isize": pkg.size(),
+                              "isize": pkg.isize,
+                              "csize": pkg.csize,
+                              "cssize": pkg.cssize,
                               "deps": ", ".join(pkg.deps),
                               "reqs": ", ".join(pkg.requiredby),
                               "optdeps": ", ".join(pkg.optdeps),

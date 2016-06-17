@@ -7,7 +7,7 @@ from time import gmtime, strftime
 last_message = u""
 head_message = u""
 
-output_log, time_format = "/tmp/pacdot.log", "%Y-%m-%d %H:%M:%S"
+output_log, time_format = "/tmp/pacvis.log", "%Y-%m-%d %H:%M:%S"
 
 def log_file():
     return open(output_log, "a")
