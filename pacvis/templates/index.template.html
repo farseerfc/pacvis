@@ -46,6 +46,7 @@
     <div id="pkgreason"></div>
     <div id="pkgdeps"></div>
     <div id="pkgreqs"></div>
+    <div id="pkgoptdeps"></div>
   </div>
 </div>
 
@@ -69,13 +70,14 @@
     var nodedata = [
       {% for node in nodes %}
         {
-          id:    {{node["id"]}} ,
-          label: '{{node["label"]}}',
-          level: {{node["level"]}},
-          group: '{{node["group"]}}',
-          isize: '{{node["isize"]}}',
-          deps:  '{{node["deps"]}}',
-          reqs:  '{{node["reqs"]}}',
+          id:       {{node["id"]}} ,
+          label:   '{{node["label"]}}',
+          level:    {{node["level"]}},
+          group:   '{{node["group"]}}',
+          isize:   '{{node["isize"]}}',
+          deps:    '{{node["deps"]}}',
+          reqs:    '{{node["reqs"]}}',
+          optdeps: '{{node["optdeps"]}}',
         },
       {% end %}
     ];
@@ -94,6 +96,12 @@
     var edges = new vis.DataSet([
       {% for link in links %}
         {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}} },
+      {% end %}
+      {% for link in circlelinks %}
+        {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, color:"red"},
+      {% end %}
+      {% for link in optlinks %}
+        {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, dashes:true, color:"yellow"},
       {% end %}
     ]);
 
@@ -195,6 +203,7 @@ var debug_performance = false;
       document.getElementById("pkgreason").innerHTML = "";
       document.getElementById("pkgdeps").innerHTML = "";
       document.getElementById("pkgreqs").innerHTML = "";
+      document.getElementById("pkgoptdeps").innerHTML = "";
       document.getElementById("togglehide").style.visibility = "hidden";
     });
 
@@ -214,6 +223,7 @@ var debug_performance = false;
       document.getElementById("pkgreason").innerHTML = "Install reason: " + reason;
       document.getElementById("pkgdeps").innerHTML = "Depends: " + createPkgListDom(node.deps);
       document.getElementById("pkgreqs").innerHTML = "Required by: "+ createPkgListDom(node.reqs);
+      document.getElementById("pkgoptdeps").innerHTML = "Optdepends: "+ createPkgListDom(node.optdeps);
       document.getElementById("togglehide").style.visibility = "visible";
       document.getElementById("togglehide").innerHTML = node.hidden? "Show" : "Hide";
     }
@@ -233,10 +243,7 @@ var debug_performance = false;
             }
           }
           selectPkg(node);
-          network.stabilize({
-            iterations: 50,
-            updateInterval: 1,
-          });
+          network.stabilize(50);
         }
       }
     }

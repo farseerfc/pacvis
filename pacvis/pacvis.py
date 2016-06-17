@@ -20,6 +20,12 @@ class PkgInfo:
         self.deps = [PkgInfo.resolve_dependency(dep).name
                      for dep in self.pkg.depends]
         self.requiredby = self.pkg.compute_requiredby()
+        self.optdeps = []
+        for dep in self.pkg.optdepends:
+            depname = dep.split(":")[0]
+            resolved = PkgInfo.resolve_dependency(depname)
+            if resolved is not None:
+                self.optdeps.append(resolved.name)
         self.level = 1
         self.circledeps = []
         self.explicit = self.pkg.reason == 0
@@ -185,17 +191,37 @@ class MainHandler(tornado.web.RequestHandler):
                               "isize": pkg.size(),
                               "deps": ", ".join(pkg.deps),
                               "reqs": ", ".join(pkg.requiredby),
+                              "optdeps": ", ".join(pkg.optdeps),
                               })
         ids = 0
+        circlelinks = []
+        optlinks = []
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
             if pkg.level < MAX_LEVEL:
                 for dep in pkg.deps:
-                    links.append({"id": ids,
-                                  "from": pkg.id,
-                                  "to": PkgInfo.all_pkgs[dep].id})
+                    if dep not in pkg.circledeps:
+                        links.append({"id": ids,
+                                      "from": pkg.id,
+                                      "to": PkgInfo.all_pkgs[dep].id})
+                    ids += 1
+                for dep in pkg.circledeps:
+                    if (pkg.id != PkgInfo.all_pkgs[dep].id):
+                        circlelinks.append({"id": ids,
+                                            "to": pkg.id,
+                                            "from": PkgInfo.all_pkgs[dep].id})
+                    ids += 1
+                for dep in pkg.optdeps:
+                    if dep in PkgInfo.all_pkgs:
+                        optlinks.append({"id": ids,
+                                         "from": pkg.id,
+                                         "to": PkgInfo.all_pkgs[dep].id})
                     ids += 1
 
-        self.render("templates/index.template.html", nodes=nodes, links=links)
+        self.render("templates/index.template.html",
+                    nodes=nodes,
+                    links=links,
+                    circlelinks=circlelinks,
+                    optlinks=optlinks)
 
 
 def make_app():
