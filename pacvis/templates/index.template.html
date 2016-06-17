@@ -41,6 +41,7 @@
     <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
     <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()"></input>
     <h2 id="pkgname"></h2>
+    <button id="togglehide" onclick="togglehide()" style="visibility:hidden"></button>
     <div id="pkgisize"></div>
     <div id="pkgreason"></div>
     <div id="pkgdeps"></div>
@@ -92,7 +93,7 @@
 
     var edges = new vis.DataSet([
       {% for link in links %}
-        {from: {{link["from"]}}, to: {{link["to"]}} },
+        {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}} },
       {% end %}
     ]);
 
@@ -150,8 +151,8 @@
         },
         timestep: 0.1,
         stabilization: {
-          iterations: 5000,
-          updateInterval: 50,
+          iterations: 1000,
+          updateInterval: 10,
         }
       }
     };
@@ -194,6 +195,7 @@ var debug_performance = false;
       document.getElementById("pkgreason").innerHTML = "";
       document.getElementById("pkgdeps").innerHTML = "";
       document.getElementById("pkgreqs").innerHTML = "";
+      document.getElementById("togglehide").style.visibility = "hidden";
     });
 
     function createPkgListDom(list){
@@ -212,6 +214,31 @@ var debug_performance = false;
       document.getElementById("pkgreason").innerHTML = "Install reason: " + reason;
       document.getElementById("pkgdeps").innerHTML = "Depends: " + createPkgListDom(node.deps);
       document.getElementById("pkgreqs").innerHTML = "Required by: "+ createPkgListDom(node.reqs);
+      document.getElementById("togglehide").style.visibility = "visible";
+      document.getElementById("togglehide").innerHTML = node.hidden? "Show" : "Hide";
+    }
+
+    function togglehide(){
+      let pkgname = document.getElementById("pkgname").innerHTML;
+      for(let node of nodes.get()){
+        if(node.label == pkgname){
+          var hide = !node.hidden;
+          nodes.update({id:node.id, hidden: hide});
+          for(let edge of edges.get()){
+            if (edge.from == node.id){
+              edges.update({id:edge.id, hidden: hide || nodes.get()[edge.to].hidden});
+            }
+            if (edge.to == node.id){
+              edges.update({id:edge.id, hidden: nodes.get()[edge.from].hidden || hide});
+            }
+          }
+          selectPkg(node);
+          network.stabilize({
+            iterations: 50,
+            updateInterval: 1,
+          });
+        }
+      }
     }
 
     function trysearch(){
@@ -220,10 +247,12 @@ var debug_performance = false;
           if(node.label == pkgname){
             network.selectNodes([node.id]);
             selectPkg(node);
-            network.focus(node.id, {
-              scale: Math.log(nodes.length)/5,
-              locked: false,
-              animation: true});
+            if(!node.hidden){
+              network.focus(node.id, {
+                scale: Math.log(nodes.length)/5,
+                locked: false,
+                animation: true});
+            }
           }
         }
     }

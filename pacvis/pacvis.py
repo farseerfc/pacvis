@@ -186,11 +186,14 @@ class MainHandler(tornado.web.RequestHandler):
                               "deps": ", ".join(pkg.deps),
                               "reqs": ", ".join(pkg.requiredby),
                               })
+        ids = 0
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
             if pkg.level < MAX_LEVEL:
                 for dep in pkg.deps:
-                    links.append({"from": pkg.id,
+                    links.append({"id": ids,
+                                  "from": pkg.id,
                                   "to": PkgInfo.all_pkgs[dep].id})
+                    ids += 1
 
         self.render("templates/index.template.html", nodes=nodes, links=links)
 
