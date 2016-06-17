@@ -32,7 +32,8 @@ issue with a modified vis.js.
 
 - [ ] we resolve dependency to package name using pyalpm directly now,
       and this information is lost on the graph
-- [ ] we do not track optdepends now
+- [x] ~~we do not track optdepends now~~
+      we draw optdepends on the graph but not consider them during topology_sort
 - [ ] we need to estimate removable size (by `pacman -Rcs`)
 - [ ] performance for layout algorithm can be improved
 - [ ] more information from pacman can be intergrated
