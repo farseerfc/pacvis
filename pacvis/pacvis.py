@@ -247,6 +247,8 @@ class MainHandler(tornado.web.RequestHandler):
                               "deps": ", ".join(pkg.deps),
                               "reqs": ", ".join(pkg.requiredby),
                               "optdeps": ", ".join(pkg.optdeps),
+                              "desc": pkg.pkg.desc,
+                              "version": pkg.pkg.version,
                               })
         ids = 0
         circlelinks = []

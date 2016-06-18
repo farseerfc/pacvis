@@ -37,7 +37,7 @@
 <div id="target" class="target"></div>
 <div class="leftpanel">
   <div id="panel" class="panel">
-    <h1 id="title">If you see this, your CPU may be too weak ...</h1>
+    <h1 id="title">PacVis | Loading ...</h1>
     <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
     <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()"></input>
     <p>Show size:
@@ -50,6 +50,8 @@
     <h2 id="pkgname"></h2>
     <button id="togglehide" onclick="togglehide()" style="visibility:hidden"></button>
     <div id="pkgsize"></div>
+    <div id="pkgversion"></div>
+    <div id="pkgdesc"></div>
     <div id="pkgreason"></div>
     <div id="pkgdeps"></div>
     <div id="pkgreqs"></div>
@@ -91,6 +93,8 @@
           deps:    '{{node["deps"]}}',
           reqs:    '{{node["reqs"]}}',
           optdeps: '{{node["optdeps"]}}',
+          desc:    '{{node["desc"]}}',
+          version: '{{node["version"]}}',
         },
       {% end %}
     ];
@@ -134,10 +138,10 @@
       nodes: {
         scaling: {
           min: 5,
-          max: 70,
+          max: 100,
           label: {
             min:5,
-            max:70,
+            max:100,
             maxVisible: 50,
             drawThreshold: 10
           }
@@ -165,14 +169,14 @@
       },
       // physics: false,
       physics: {
-        maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+        maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
         hierarchicalRepulsion: {
           nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
           springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*80),
           springConstant: 1,
           damping: 0.1
         },
-        timestep: 0.1,
+        timestep: 0.3/Math.log(nodes.length),
         stabilization: {
           iterations: 1000,
           updateInterval: 10,
@@ -183,7 +187,7 @@
 
     var network = new vis.Network(container, data, options);
 
-var debug_performance = false;
+var debug_performance = true;
 
     network.on("startStabilizing", function (params) {
       document.title = 'PacVis';
@@ -219,6 +223,8 @@ var debug_performance = false;
       document.getElementById("pkgdeps").innerHTML = "";
       document.getElementById("pkgreqs").innerHTML = "";
       document.getElementById("pkgoptdeps").innerHTML = "";
+      document.getElementById("pkgversion").innerHTML = "";
+      document.getElementById("pkgdesc").innerHTML = "";
       document.getElementById("togglehide").style.visibility = "hidden";
     });
 
@@ -242,6 +248,8 @@ var debug_performance = false;
       document.getElementById("pkgdeps").innerHTML = "Depends: " + createPkgListDom(node.deps);
       document.getElementById("pkgreqs").innerHTML = "Required by: "+ createPkgListDom(node.reqs);
       document.getElementById("pkgoptdeps").innerHTML = "Optdepends: "+ createPkgListDom(node.optdeps);
+      document.getElementById("pkgversion").innerHTML = "Version: " + node.version;
+      document.getElementById("pkgdesc").innerHTML = "Description: " + node.desc;
       document.getElementById("togglehide").style.visibility = "visible";
       document.getElementById("togglehide").innerHTML = node.hidden? "Show" : "Hide";
     }
