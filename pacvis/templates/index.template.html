@@ -179,7 +179,7 @@
         timestep: 0.2/Math.log(nodes.length),
         stabilization: {
           iterations: 200*Math.log(nodes.length),
-          updateInterval: 10,
+          updateInterval: 2*Math.log(nodes.length),
         }
       }
     };
