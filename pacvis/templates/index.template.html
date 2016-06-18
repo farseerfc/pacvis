@@ -176,9 +176,9 @@
           springConstant: 1,
           damping: 0.1
         },
-        timestep: 0.3/Math.log(nodes.length),
+        timestep: 0.2/Math.log(nodes.length),
         stabilization: {
-          iterations: 1000,
+          iterations: 100*Math.log(nodes.length),
           updateInterval: 10,
         }
       }
@@ -187,7 +187,7 @@
 
     var network = new vis.Network(container, data, options);
 
-var debug_performance = true;
+var debug_performance = false;
 
     network.on("startStabilizing", function (params) {
       document.title = 'PacVis';
