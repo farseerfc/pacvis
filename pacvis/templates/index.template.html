@@ -12,17 +12,18 @@
       padding: 0 0 0 0;
     }
     .target {
-      width: 70vw;
+      width: 100vw;
       height: 100vh;
       margin: 0 0 0 0;
       padding: 0 0 0 0;
     }
     .leftpanel{
       position: fixed;
-      top: 0;
-      left: 70vw;
-      width: 30vw;
-      height: 100vh;
+      top: 30px;
+      right: 30px;
+      width: 400px;
+      height: auto;
+      max-height: 95%;
       margin: 0 0 0 0;
       background-color: #ccc;
       overflow-y: auto;
@@ -176,9 +177,9 @@
           springConstant: 1,
           damping: 0.1
         },
-        timestep: 0.2/Math.log(nodes.length),
+        timestep: 0.1,
         stabilization: {
-          iterations: 200*Math.log(nodes.length),
+          iterations: 300*Math.log(nodes.length),
           updateInterval: 2*Math.log(nodes.length),
         }
       }
