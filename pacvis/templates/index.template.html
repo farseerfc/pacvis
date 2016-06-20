@@ -50,6 +50,7 @@
     </p>
     <h2 id="pkgname"></h2>
     <button id="togglehide" onclick="togglehide()" style="visibility:hidden"></button>
+    <div id="pkglevel"></div>
     <div id="pkgsize"></div>
     <div id="pkgversion"></div>
     <div id="pkgdesc"></div>
@@ -226,6 +227,7 @@ var debug_performance = false;
       document.getElementById("pkgoptdeps").innerHTML = "";
       document.getElementById("pkgversion").innerHTML = "";
       document.getElementById("pkgdesc").innerHTML = "";
+      document.getElementById("pkglevel").innerHTML = "";
       document.getElementById("togglehide").style.visibility = "hidden";
     });
 
@@ -251,6 +253,7 @@ var debug_performance = false;
       document.getElementById("pkgoptdeps").innerHTML = "Optdepends: "+ createPkgListDom(node.optdeps);
       document.getElementById("pkgversion").innerHTML = "Version: " + node.version;
       document.getElementById("pkgdesc").innerHTML = "Description: " + node.desc;
+      document.getElementById("pkglevel").innerHTML = "Topology Level: " + node.level;
       document.getElementById("togglehide").style.visibility = "visible";
       document.getElementById("togglehide").innerHTML = node.hidden? "Show" : "Hide";
     }
