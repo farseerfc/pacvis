@@ -207,11 +207,12 @@ def test_circle_detection():
 # Tornado entry
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        MAX_LEVEL = int(self.get_argument("maxlevel", "1000"))
+        maxlevel = int(self.get_argument("maxlevel", "1000"))
+        maxreqs = int(self.get_argument("maxreqs", "30"))
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache
-        print_message("Max level: %d" % MAX_LEVEL)
+        print_message("Max level: %d" % maxlevel)
         start_message("Loading local database ...")
         PkgInfo.find_all()
         append_message("done")
@@ -231,7 +232,7 @@ class MainHandler(tornado.web.RequestHandler):
             append_message("%s" % pkg.name)
             pkg.id = ids
             ids += 1
-            if pkg.level < MAX_LEVEL:
+            if pkg.level < maxlevel:
                 group = "normal"
                 if pkg.level == 0:
                     group = "standalone"
@@ -254,31 +255,34 @@ class MainHandler(tornado.web.RequestHandler):
         circlelinks = []
         optlinks = []
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
-            if pkg.level < MAX_LEVEL:
+            if pkg.level < maxlevel:
                 for dep in pkg.deps:
                     if dep not in pkg.circledeps:
-                        links.append({"id": ids,
-                                      "from": pkg.id,
-                                      "to": PkgInfo.all_pkgs[dep].id})
-                    ids += 1
+                        if len(PkgInfo.all_pkgs[dep].requiredby) < maxreqs:
+                            links.append({"id": ids,
+                                          "from": pkg.id,
+                                          "to": PkgInfo.all_pkgs[dep].id})
+                            ids += 1
                 for dep in pkg.circledeps:
                     if (pkg.id != PkgInfo.all_pkgs[dep].id):
                         circlelinks.append({"id": ids,
                                             "to": pkg.id,
                                             "from": PkgInfo.all_pkgs[dep].id})
-                    ids += 1
+                        ids += 1
                 for dep in pkg.optdeps:
                     if dep in PkgInfo.all_pkgs:
                         optlinks.append({"id": ids,
                                          "from": pkg.id,
                                          "to": PkgInfo.all_pkgs[dep].id})
-                    ids += 1
+                        ids += 1
         print_message("Wrting HTML")
         self.render("templates/index.template.html",
                     nodes=nodes,
                     links=links,
                     circlelinks=circlelinks,
-                    optlinks=optlinks)
+                    optlinks=optlinks,
+                    options={"maxlevel" : maxlevel,
+                             "maxreqs" : maxreqs})
 
 
 def make_app():

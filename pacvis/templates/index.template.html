@@ -40,24 +40,47 @@
   <div id="panel" class="panel">
     <h1 id="title">PacVis | Loading ...</h1>
     <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
-    <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()"></input>
-    <p>Show size:
-      <select onchange="switchsize()" id="selectsize">
-        <option id="isize" value="isize" selected>Install Size (-R)</option>
-        <option id="csize" value="csize">Cascade Size (-Rc)</option>
-        <option id="cssize" value="cssize">Recursive Size (-Rcs)</option>
-      </select>
-    </p>
+    <fieldset>
+        <legend>Graph Options</legend>
+          <form method="get" action="/">
+             <p>Max Level: <input type="number" id="maxlevel" name="maxlevel" value="{{options['maxlevel']}}" /></p>
+             <p>Max Required-By: <input type="number" id="maxreqs" name="maxreqs" value="{{options['maxreqs']}}" /></p>
+             <input type="submit" value="Reload" />
+          </form>
+    </fieldset>
+    <fieldset>
+      <legend>Search and Size</legend>
+      <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()" />
+      <p>Show size:
+        <select onchange="switchsize()" id="selectsize">
+          <option id="isize" value="isize" selected>Install Size (-R)</option>
+          <option id="csize" value="csize">Cascade Size (-Rc)</option>
+          <option id="cssize" value="cssize">Recursive Size (-Rcs)</option>
+        </select>
+      </p>
+    </fieldset>
     <h2 id="pkgname"></h2>
     <button id="togglehide" onclick="togglehide()" style="visibility:hidden"></button>
-    <div id="pkglevel"></div>
-    <div id="pkgsize"></div>
-    <div id="pkgversion"></div>
-    <div id="pkgdesc"></div>
-    <div id="pkgreason"></div>
-    <div id="pkgdeps"></div>
-    <div id="pkgreqs"></div>
-    <div id="pkgoptdeps"></div>
+    <fieldset id="fsinfo"  style="visibility:hidden">
+      <legend>Package Info</legend>
+      <div id="pkglevel"></div>
+      <div id="pkgsize"></div>
+      <div id="pkgversion"></div>
+      <div id="pkgdesc"></div>
+      <div id="pkgreason"></div>
+    </fieldset>
+    <fieldset id="fsdeps"  style="visibility:hidden">
+      <legend>Depends</legend>
+      <div id="pkgdeps"></div>
+    </fieldset>
+    <fieldset id="fsreqs"  style="visibility:hidden">
+      <legend>Required-by</legend>
+      <div id="pkgreqs"></div>
+    </fieldset>
+    <fieldset id="fsoptdeps"  style="visibility:hidden">
+      <legend>Optional Depends</legend>
+      <div id="pkgoptdeps"></div>
+    </fieldset>
   </div>
 </div>
 
@@ -219,16 +242,10 @@ var debug_performance = false;
         selectPkg(nodes.get(params.nodes[0]));
     });
     network.on("deselectNode", function (params) {
-      document.getElementById("pkgname").innerHTML = "";
-      document.getElementById("pkgsize").innerHTML = "";
-      document.getElementById("pkgreason").innerHTML = "";
-      document.getElementById("pkgdeps").innerHTML = "";
-      document.getElementById("pkgreqs").innerHTML = "";
-      document.getElementById("pkgoptdeps").innerHTML = "";
-      document.getElementById("pkgversion").innerHTML = "";
-      document.getElementById("pkgdesc").innerHTML = "";
-      document.getElementById("pkglevel").innerHTML = "";
-      document.getElementById("togglehide").style.visibility = "hidden";
+      document.getElementById("fsinfo").style.visibility = "hidden";
+      document.getElementById("fsdeps").style.visibility = "hidden";
+      document.getElementById("fsreqs").style.visibility = "hidden";
+      document.getElementById("fsoptdeps").style.visibility = "hidden";
     });
 
     function createPkgListDom(list){
@@ -242,20 +259,27 @@ var debug_performance = false;
 
     function selectPkg(node){
       document.getElementById("pkgname").innerHTML = node.label;
+
+      document.getElementById("fsinfo").style.visibility = "visible";
+
       var selectsize = document.getElementById("selectsize");
       document.getElementById("pkgsize").innerHTML =
         selectsize.options[selectsize.selectedIndex].text +
         ": "+ filesize(node[selectsize.value]);
       let reason = node.group == "normal" ? "as a dependency" : "explicitly";
       document.getElementById("pkgreason").innerHTML = "Install reason: " + reason;
-      document.getElementById("pkgdeps").innerHTML = "Depends: " + createPkgListDom(node.deps);
-      document.getElementById("pkgreqs").innerHTML = "Required by: "+ createPkgListDom(node.reqs);
-      document.getElementById("pkgoptdeps").innerHTML = "Optdepends: "+ createPkgListDom(node.optdeps);
       document.getElementById("pkgversion").innerHTML = "Version: " + node.version;
       document.getElementById("pkgdesc").innerHTML = "Description: " + node.desc;
       document.getElementById("pkglevel").innerHTML = "Topology Level: " + node.level;
       document.getElementById("togglehide").style.visibility = "visible";
       document.getElementById("togglehide").innerHTML = node.hidden? "Show" : "Hide";
+
+      document.getElementById("fsdeps").style.visibility = "visible";
+      document.getElementById("pkgdeps").innerHTML = createPkgListDom(node.deps);
+      document.getElementById("fsreqs").style.visibility = "visible";
+      document.getElementById("pkgreqs").innerHTML = createPkgListDom(node.reqs);
+      document.getElementById("fsoptdeps").style.visibility = "visible";
+      document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
     }
 
     function togglehide(){
