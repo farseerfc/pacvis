@@ -41,17 +41,9 @@ function selectPkg(node) {
   document.getElementById("pkgversion").innerHTML = node.version;
   document.getElementById("pkgdesc").innerHTML = node.desc;
   document.getElementById("pkglevel").innerHTML = node.level;
-  // document.getElementById("togglehide").style.visibility = "visible";
-  // document.getElementById("togglehide").innerHTML =
-  //     node.hidden ? "Show" : "Hide";
-
-  // document.getElementById("fsdeps").style.visibility = "visible";
   document.getElementById("pkgdeps").innerHTML = createPkgListDom(node.deps);
-  // document.getElementById("fsreqs").style.visibility = "visible";
   document.getElementById("pkgreqs").innerHTML = createPkgListDom(node.reqs);
-  // document.getElementById("fsoptdeps").style.visibility = "visible";
-  document.getElementById("pkgoptdeps").innerHTML =
-      createPkgListDom(node.optdeps);
+  document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
 }
 
 function togglehide() {

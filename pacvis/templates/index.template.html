@@ -55,7 +55,9 @@
                 <input class="mdl-textfield__input" type="number" id="maxreqs" name="maxreqs" value="{{options['maxreqs']}}" />
                 <label class="mdl-textfield__label" for="sample3">Max Required-By: </label>
               </div>
-
+            </div>
+            <div class="mdl-card__supporting-text">
+                {{len(nodes)}} packages
             </div>
             <div class="mdl-card__actions mdl-card--border">
               <input type="submit" value="Reload" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"/>
@@ -246,22 +248,12 @@ function pacvis(){
     }
     document.querySelector('#loading_progress').MaterialProgress.setProgress(100);
   });
-  // network.on("stabilized", function (params) {
-  //   document.title = 'PacVis';
-  //   if(debug_performance){
-  //     document.getElementById("title").innerHTML = "PacVis | loaded in: " + window.performance.now()/1000 ;
-  //   }else{
-  //     document.getElementById("title").innerHTML = "PacVis";
-  //   }
-  // });
+
   network.on("selectNode", function (params) {
       selectPkg(nodes.get(params.nodes[0]));
   });
   network.on("deselectNode", function (params) {
     document.getElementById("fsinfo").style.visibility = "hidden";
-    // document.getElementById("fsdeps").style.visibility = "hidden";
-    // document.getElementById("fsreqs").style.visibility = "hidden";
-    // document.getElementById("fsoptdeps").style.visibility = "hidden";
   });
 }
 
