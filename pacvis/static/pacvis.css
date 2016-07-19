@@ -1,0 +1,34 @@
+body{
+  /*margin: 0 0 0 0;
+  padding: 0 0 0 0;*/
+}
+.target {
+  /*width: 100vw;*/
+  height: 90vh;
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
+}
+.leftpanel{
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  width: 400px;
+  height: auto;
+  max-height: 90%;
+  margin: 0 0 0 0;
+  background-color: #ccc;
+  overflow-y: auto;
+}
+.panel{
+  margin: 30px;
+  position: relative;
+  font-family: monospace;
+}
+.mdl-card {
+    margin: 8px;
+    width: 100%;
+    min-height: 100px;
+}
+.mdl-data-table{
+  border: 0px;
+}
