@@ -208,7 +208,7 @@ def test_circle_detection():
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         maxlevel = int(self.get_argument("maxlevel", "1000"))
-        maxreqs = int(self.get_argument("maxreqs", "30"))
+        maxreqs = int(self.get_argument("maxreqs", "100"))
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache

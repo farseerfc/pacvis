@@ -2,335 +2,276 @@
 <html>
 <head>
   <title>PacVis</title>
-
   <script type="text/javascript" src="static/vis-network.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.min.css" rel="stylesheet" type="text/css" />
-
-  <style type="text/css">
-    body{
-      margin: 0 0 0 0;
-      padding: 0 0 0 0;
-    }
-    .target {
-      width: 100vw;
-      height: 100vh;
-      margin: 0 0 0 0;
-      padding: 0 0 0 0;
-    }
-    .leftpanel{
-      position: fixed;
-      top: 30px;
-      right: 30px;
-      width: 400px;
-      height: auto;
-      max-height: 95%;
-      margin: 0 0 0 0;
-      background-color: #ccc;
-      overflow-y: auto;
-    }
-    .panel{
-      margin: 30px;
-      font-family: monospace;
-    }
-  </style>
+  <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.deep_purple-amber.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+  <script src="static/pacvis.js"></script>
+  <link rel="stylesheet" href="static/pacvis.css">
 </head>
 <body>
-<div id="target" class="target"></div>
-<div class="leftpanel">
-  <div id="panel" class="panel">
-    <h1 id="title">PacVis | Loading ...</h1>
-    <p><a href="https://github.com/farseerfc/pacvis/">https://github.com/farseerfc/pacvis/</a></p>
-    <fieldset>
-        <legend>Graph Options</legend>
+<div class="mdl-layout mdl-js-layout">
+  <header class="mdl-layout__header mdl-layout__header--scroll">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout-title">PacVis</span>
+      <div class="mdl-layout-spacer"></div>
+      <select onchange="switchsize()" id="selectsize">
+        <option id="isize" value="isize" selected>Install Size (-R)</option>
+        <option id="csize" value="csize">Cascade Size (-Rc)</option>
+        <option id="cssize" value="cssize">Recursive Size (-Rcs)</option>
+      </select>
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                  mdl-textfield--floating-label mdl-textfield--align-right">
+        <label class="mdl-button mdl-js-button mdl-button--icon" for="search">
+          <i class="material-icons">search</i>
+        </label>
+        <div class="mdl-textfield__expandable-holder">
+          <input class="mdl-textfield__input" type="text" id="search" placeholder="search pkgname" />
+        </div>
+      </div>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link" href="https://github.com/farseerfc/pacvis/">GitHub Repo</a>
+      </nav>
+    </div>
+  </header>
+  <main class="mdl-layout__content">
+    <div id="loading_progress" class="mdl-progress mdl-js-progress" style="width:100%"></div>
+    <div class="mdl-grid">
+      <div id="target" class="mdl-cell mdl-cell--9-col target"></div>
+      <div class="mdl-cell mdl-cell--3-col">
+
+
+      <div class="page-content">
+
+        <div class="mdl-card mdl-shadow--2dp">
           <form method="get" action="/">
-             <p>Max Level: <input type="number" id="maxlevel" name="maxlevel" value="{{options['maxlevel']}}" /></p>
-             <p>Max Required-By: <input type="number" id="maxreqs" name="maxreqs" value="{{options['maxreqs']}}" /></p>
-             <input type="submit" value="Reload" />
+            <div class="mdl-card__title mdl-card--expand">
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <input class="mdl-textfield__input" type="number" id="maxlevel" name="maxlevel" value="{{options['maxlevel']}}" />
+                <label class="mdl-textfield__label" for="sample3">Max Level: </label>
+              </div>
+              <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <input class="mdl-textfield__input" type="number" id="maxreqs" name="maxreqs" value="{{options['maxreqs']}}" />
+                <label class="mdl-textfield__label" for="sample3">Max Required-By: </label>
+              </div>
+
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <input type="submit" value="Reload" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"/>
+            </div>
           </form>
-    </fieldset>
-    <fieldset>
-      <legend>Search and Size</legend>
-      <input type="text" id="search" placeholder="search pkgname" onchange="trysearch()" />
-      <p>Show size:
-        <select onchange="switchsize()" id="selectsize">
-          <option id="isize" value="isize" selected>Install Size (-R)</option>
-          <option id="csize" value="csize">Cascade Size (-Rc)</option>
-          <option id="cssize" value="cssize">Recursive Size (-Rcs)</option>
-        </select>
-      </p>
-    </fieldset>
-    <h2 id="pkgname"></h2>
-    <button id="togglehide" onclick="togglehide()" style="visibility:hidden"></button>
-    <fieldset id="fsinfo"  style="visibility:hidden">
-      <legend>Package Info</legend>
-      <div id="pkglevel"></div>
-      <div id="pkgsize"></div>
-      <div id="pkgversion"></div>
-      <div id="pkgdesc"></div>
-      <div id="pkgreason"></div>
-    </fieldset>
-    <fieldset id="fsdeps"  style="visibility:hidden">
-      <legend>Depends</legend>
-      <div id="pkgdeps"></div>
-    </fieldset>
-    <fieldset id="fsreqs"  style="visibility:hidden">
-      <legend>Required-by</legend>
-      <div id="pkgreqs"></div>
-    </fieldset>
-    <fieldset id="fsoptdeps"  style="visibility:hidden">
-      <legend>Optional Depends</legend>
-      <div id="pkgoptdeps"></div>
-    </fieldset>
-  </div>
+        </div>
+
+        <div class="mdl-card mdl-shadow--2dp"  id="fsinfo"  style="visibility:hidden">
+          <div class="mdl-card__title mdl-card--expand">
+              <h3 id="pkgname"></h3>
+          </div>
+          <div class="mdl-card__actions mdl-card--border">
+            <h5 id="pkgdesc"></h5>
+            <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+              <div class="mdl-tabs__tab-bar">
+                  <a href="#info-panel" class="mdl-tabs__tab is-active">Info</a>
+                  <a href="#dep-panel" class="mdl-tabs__tab">Dep</a>
+                  <a href="#req-panel" class="mdl-tabs__tab">Req</a>
+                  <a href="#opt-panel" class="mdl-tabs__tab">Opt</a>
+              </div>
+
+              <div class="mdl-tabs__panel is-active" id="info-panel">
+                <table class="mdl-data-table mdl-js-data-table">
+                  <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Topology Level</th>
+                    <td id="pkglevel" class="mdl-data-table__cell--non-numeric"></td>
+                  </tr>
+                  <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Size</th>
+                    <td id="pkgsize" class="mdl-data-table__cell--non-numeric"></td>
+                  </tr>
+                  <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Version</th>
+                    <td id="pkgversion" class="mdl-data-table__cell--non-numeric"></td>
+                  </tr>
+                  <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Install reason</th>
+                    <td id="pkgreason" class="mdl-data-table__cell--non-numeric"></td>
+                  </tr>
+                </table>
+              </div>
+              <div class="mdl-tabs__panel" id="dep-panel">
+                <div id="pkgdeps"></div>
+              </div>
+              <div class="mdl-tabs__panel" id="req-panel">
+                <div id="pkgreqs"></div>
+              </div>
+              <div class="mdl-tabs__panel" id="opt-panel">
+                <div id="pkgoptdeps"></div>
+              </div>
+            </div>
+            <!-- <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+                    id="togglehide" onclick="togglehide()" style="visibility:hidden"></button> -->
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+  </main>
 </div>
 
-  <script type="text/javascript">
+<script type="text/javascript">
 
-    function filesize(size) {
-      var units = "KMGT";
-      var left = size;
-      var unit = -1;
-      for (; left > 1100 && unit < 3; unit++) {
-        left /= 1024;
-      }
-      if (unit === -1) {
-        return size+"B";
-      } else {
-        if (size < 0) left = -left;
-        return Math.round(left * 100) / 100 + units[unit] + "iB";
-      }
-    }
+var nodedata = [
+  {% for node in nodes %}
+    {
+      id:       {{node["id"]}} ,
+      label:   '{{node["label"]}}',
+      level:    {{node["level"]}},
+      group:   '{{node["group"]}}',
+      isize:    {{node["isize"]}},
+      csize:    {{node["csize"]}},
+      cssize:    {{node["cssize"]}},
+      deps:    '{{node["deps"]}}',
+      reqs:    '{{node["reqs"]}}',
+      optdeps: '{{node["optdeps"]}}',
+      desc:    '{{node["desc"]}}',
+      version: '{{node["version"]}}',
+    },
+  {% end %}
+];
 
-    function size2value(size){
-      return Math.sqrt(Math.sqrt(size))/5;
-    }
+for(let nodeid in nodedata){
+  let node = nodedata[nodeid];
+  node.title = "<h4>" + node.label + "</h4>" +
+    "<p>installed size: " + filesize(node.isize) + "</p>" +
+    "<p>depends: [" + node.deps + "]</p>" +
+    "<p>required by:[" + node.reqs +"]</p>";
+  node.value = size2value(node.isize);
+}
 
-    var nodedata = [
-      {% for node in nodes %}
-        {
-          id:       {{node["id"]}} ,
-          label:   '{{node["label"]}}',
-          level:    {{node["level"]}},
-          group:   '{{node["group"]}}',
-          isize:    {{node["isize"]}},
-          csize:    {{node["csize"]}},
-          cssize:    {{node["cssize"]}},
-          deps:    '{{node["deps"]}}',
-          reqs:    '{{node["reqs"]}}',
-          optdeps: '{{node["optdeps"]}}',
-          desc:    '{{node["desc"]}}',
-          version: '{{node["version"]}}',
-        },
-      {% end %}
-    ];
+var nodes = new vis.DataSet(nodedata);
 
-    for(let nodeid in nodedata){
-      let node = nodedata[nodeid];
-      node.title = "<h4>" + node.label + "</h4>" +
-        "<p>installed size: " + filesize(node.isize) + "</p>" +
-        "<p>depends: [" + node.deps + "]</p>" +
-        "<p>required by:[" + node.reqs +"]</p>";
-      node.value = size2value(node.isize);
-    }
+var edges = new vis.DataSet([
+  {% for link in links %}
+    {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}} },
+  {% end %}
+  {% for link in circlelinks %}
+    {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, color:"red"},
+  {% end %}
+  {% for link in optlinks %}
+    {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, dashes:true, color:"yellow"},
+  {% end %}
+]);
 
-    var nodes = new vis.DataSet(nodedata);
-
-    var edges = new vis.DataSet([
-      {% for link in links %}
-        {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}} },
-      {% end %}
-      {% for link in circlelinks %}
-        {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, color:"red"},
-      {% end %}
-      {% for link in optlinks %}
-        {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, dashes:true, color:"yellow"},
-      {% end %}
-    ]);
-
-    // create a network
-    var container = document.getElementById('target');
-    var data = {
-      nodes: nodes,
-      edges: edges
-    };
-    var options = {
-      groups: {
-        standalone: { shape: 'square', size: 12 },
-        normal: { shape: 'dot', color: 'rgb(200,255,200)'},
-        explicit: { shape: 'dot', color: 'rgb(200,200,255)'},
-        consolidated: { shape: 'star', color: 'red', size: 12},
-      },
-      nodes: {
-        scaling: {
-          min: 5,
-          max: 100,
-          label: {
-            min:5,
-            max:100,
-            maxVisible: 50,
-            drawThreshold: 10
-          }
-        }
-      },
-      edges: {
-         smooth: {
-             type: 'cubicBezier',
-             forceDirection: 'vertical' ,
-             roundness: 0.4
-         },
-         arrows: {to : true }
-      },
-      layout: {
-         hierarchical: {
-             direction: "UD",
-             nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
-             treeSpacing: 50,
-             levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*50),
-             blockShifting: false,
-             edgeMinimization: false,
-             parentCentralization: false
-         },
-        improvedLayout: true
-      },
-      // physics: false,
-      physics: {
-        maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
-        hierarchicalRepulsion: {
-          nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
-          springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*80),
-          springConstant: 1,
-          damping: 0.1
-        },
-        timestep: 0.1,
-        stabilization: {
-          iterations: 300*Math.log(nodes.length),
-          updateInterval: 2*Math.log(nodes.length),
-        }
-      }
-    };
-
-
-    var network = new vis.Network(container, data, options);
-
-var debug_performance = false;
-
-    network.on("startStabilizing", function (params) {
-      document.title = 'PacVis';
-      document.getElementById("title").innerHTML = "PacVis";
-    });
-    network.on("stabilizationProgress", function (params) {
-      document.title = 'PacVis | ' +  Math.round(params.iterations/params.total*100) + "%";
-      document.getElementById("title").innerHTML = "Layouting ... " + Math.round(params.iterations/params.total*100) + "%";
-    });
-    network.on("stabilizationIterationsDone", function (params) {
-      document.title = 'PacVis';
-      if(debug_performance){
-        document.getElementById("title").innerHTML = "PacVis | loaded in: " + window.performance.now()/1000 ;
-      }else{
-        document.getElementById("title").innerHTML = "PacVis";
-      }
-    });
-    network.on("stabilized", function (params) {
-      document.title = 'PacVis';
-      if(debug_performance){
-        document.getElementById("title").innerHTML = "PacVis | loaded in: " + window.performance.now()/1000 ;
-      }else{
-        document.getElementById("title").innerHTML = "PacVis";
-      }
-    });
-    network.on("selectNode", function (params) {
-        selectPkg(nodes.get(params.nodes[0]));
-    });
-    network.on("deselectNode", function (params) {
-      document.getElementById("fsinfo").style.visibility = "hidden";
-      document.getElementById("fsdeps").style.visibility = "hidden";
-      document.getElementById("fsreqs").style.visibility = "hidden";
-      document.getElementById("fsoptdeps").style.visibility = "hidden";
-    });
-
-    function createPkgListDom(list){
-      let depsdom = "";
-      if(list=="") return "";
-      for(let dep of list.split(", ")){
-        depsdom += "<button onclick='document.getElementById(\"search\").value=\"" + dep + "\";trysearch()'>" + dep +"</button>";
-      }
-      return depsdom;
-    }
-
-    function selectPkg(node){
-      document.getElementById("pkgname").innerHTML = node.label;
-
-      document.getElementById("fsinfo").style.visibility = "visible";
-
-      var selectsize = document.getElementById("selectsize");
-      document.getElementById("pkgsize").innerHTML =
-        selectsize.options[selectsize.selectedIndex].text +
-        ": "+ filesize(node[selectsize.value]);
-      let reason = node.group == "normal" ? "as a dependency" : "explicitly";
-      document.getElementById("pkgreason").innerHTML = "Install reason: " + reason;
-      document.getElementById("pkgversion").innerHTML = "Version: " + node.version;
-      document.getElementById("pkgdesc").innerHTML = "Description: " + node.desc;
-      document.getElementById("pkglevel").innerHTML = "Topology Level: " + node.level;
-      document.getElementById("togglehide").style.visibility = "visible";
-      document.getElementById("togglehide").innerHTML = node.hidden? "Show" : "Hide";
-
-      document.getElementById("fsdeps").style.visibility = "visible";
-      document.getElementById("pkgdeps").innerHTML = createPkgListDom(node.deps);
-      document.getElementById("fsreqs").style.visibility = "visible";
-      document.getElementById("pkgreqs").innerHTML = createPkgListDom(node.reqs);
-      document.getElementById("fsoptdeps").style.visibility = "visible";
-      document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
-    }
-
-    function togglehide(){
-      let pkgname = document.getElementById("pkgname").innerHTML;
-      for(let node of nodes.get()){
-        if(node.label == pkgname){
-          var hide = !node.hidden;
-          nodes.update({id:node.id, hidden: hide});
-          for(let edge of edges.get()){
-            if (edge.from == node.id){
-              edges.update({id:edge.id, hidden: hide || nodes.get()[edge.to].hidden});
-            }
-            if (edge.to == node.id){
-              edges.update({id:edge.id, hidden: nodes.get()[edge.from].hidden || hide});
-            }
-          }
-          selectPkg(node);
-          network.stabilize(50);
-        }
+// create a network
+var container = document.getElementById('target');
+var data = {
+  nodes: nodes,
+  edges: edges
+};
+var options = {
+  groups: {
+    standalone: { shape: 'square', size: 12 },
+    normal: { shape: 'dot', color: 'rgb(200,255,200)'},
+    explicit: { shape: 'dot', color: 'rgb(200,200,255)'},
+    consolidated: { shape: 'star', color: 'red', size: 12},
+  },
+  nodes: {
+    scaling: {
+      min: 5,
+      max: 100,
+      label: {
+        min:5,
+        max:100,
+        maxVisible: 50,
+        drawThreshold: 10
       }
     }
-
-    function trysearch(){
-        let pkgname = document.getElementById("search").value;
-        for(let node of nodes.get()){
-          if(node.label == pkgname){
-            network.selectNodes([node.id]);
-            selectPkg(node);
-            if(!node.hidden){
-              network.focus(node.id, {
-                scale: Math.log(nodes.length)/5,
-                locked: false,
-                animation: {duration:500, easingFunction:"linear"}
-              });
-            }
-          }
-        }
+  },
+  edges: {
+     smooth: {
+         type: 'cubicBezier',
+         forceDirection: 'vertical' ,
+         roundness: 0.4
+     },
+     arrows: {to : true }
+  },
+  layout: {
+     hierarchical: {
+         direction: "UD",
+         nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+         treeSpacing: 50,
+         levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*50),
+         blockShifting: false,
+         edgeMinimization: false,
+         parentCentralization: false
+     },
+    improvedLayout: true
+  },
+  // physics: false,
+  physics: {
+    maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
+    hierarchicalRepulsion: {
+      nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+      springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*80),
+      springConstant: 1,
+      damping: 0.1
+    },
+    timestep: 0.1,
+    stabilization: {
+      iterations: 300*Math.log(nodes.length),
+      updateInterval: 2*Math.log(nodes.length),
     }
+  }
+};
 
-    function switchsize(){
-      let selectsize = document.getElementById("selectsize");
-      let size = selectsize.options[selectsize.selectedIndex].value;
-      let pkgname = document.getElementById("pkgname").innerHTML;
-      for(let node of nodes.get()){
-        nodes.update({id:node.id, value:size2value(node[size])});
-        if(node.label == pkgname){
-          selectPkg(node);
-        }
-      }
+var network = null;
+
+function pacvis(){
+  network = new vis.Network(container, data, options);
+
+  var debug_performance = false;
+
+  network.on("startStabilizing", function (params) {
+    document.title = 'PacVis';
+  });
+  network.on("stabilizationProgress", function (params) {
+    document.title = 'PacVis | ' +  Math.round(params.iterations/params.total*100) + "%";
+    document.querySelector('#loading_progress').MaterialProgress.setProgress(Math.round(params.iterations/params.total*100));
+  });
+  network.on("stabilizationIterationsDone", function (params) {
+    if(debug_performance){
+      document.title = "PacVis | loaded in: " + window.performance.now()/1000 ;
+    }else{
+      document.title = "PacVis";
     }
-  </script>
+    document.querySelector('#loading_progress').MaterialProgress.setProgress(100);
+  });
+  // network.on("stabilized", function (params) {
+  //   document.title = 'PacVis';
+  //   if(debug_performance){
+  //     document.getElementById("title").innerHTML = "PacVis | loaded in: " + window.performance.now()/1000 ;
+  //   }else{
+  //     document.getElementById("title").innerHTML = "PacVis";
+  //   }
+  // });
+  network.on("selectNode", function (params) {
+      selectPkg(nodes.get(params.nodes[0]));
+  });
+  network.on("deselectNode", function (params) {
+    document.getElementById("fsinfo").style.visibility = "hidden";
+    // document.getElementById("fsdeps").style.visibility = "hidden";
+    // document.getElementById("fsreqs").style.visibility = "hidden";
+    // document.getElementById("fsoptdeps").style.visibility = "hidden";
+  });
+}
+
+
+
+document.querySelector('#search').addEventListener('change', trysearch);
+document.querySelector('#loading_progress').addEventListener('mdl-componentupgraded', pacvis);
+
+
+</script>
 
 </body>
 </html>
