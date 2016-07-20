@@ -1,19 +1,18 @@
 .target {
-  /*width: 100vw;*/
-  height: 90vh;
+  width: 100vw;
+  height: 100vh;
   margin: 0 0 0 0;
   padding: 0 0 0 0;
 }
 .leftpanel{
-  position: fixed;
-  top: 30px;
-  right: 30px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
   width: 400px;
   height: auto;
   max-height: 90%;
   margin: 0 0 0 0;
-  background-color: #ccc;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 .panel{
   margin: 30px;
