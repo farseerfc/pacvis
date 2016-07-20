@@ -21,7 +21,7 @@
         <option id="csize" value="csize">Cascade Size (-Rc)</option>
         <option id="cssize" value="cssize">Recursive Size (-Rcs)</option>
       </select>
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+      <!-- <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
                   mdl-textfield--floating-label mdl-textfield--align-right">
         <label class="mdl-button mdl-js-button mdl-button--icon" for="search">
           <i class="material-icons">search</i>
@@ -29,7 +29,7 @@
         <div class="mdl-textfield__expandable-holder">
           <input class="mdl-textfield__input" type="text" id="search" placeholder="search pkgname" />
         </div>
-      </div>
+      </div> -->
       <nav class="mdl-navigation">
         <a class="mdl-navigation__link" href="https://github.com/farseerfc/pacvis/">GitHub Repo</a>
       </nav>
@@ -43,6 +43,33 @@
 
 
       <div class="page-content">
+
+        <div class="demo-card-event mdl-card mdl-shadow--2dp"  style="background-color: rgb(103,58,183); color: #fff">
+          <div class="mdl-card__title mdl-card--expand">
+            <h3 style="color:#fff">PacVis</h3>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                        mdl-textfield--floating-label mdl-textfield--align-right"
+                 style="color:#fff">
+              <label class="mdl-button mdl-js-button mdl-button--icon" for="search">
+                <i class="material-icons">search</i>
+              </label>
+              <div class="mdl-textfield__expandable-holder">
+                <input class="mdl-textfield__input" type="text" id="search" placeholder="search pkgname" />
+              </div>
+            </div>
+          </div>
+          <select onchange="switchsize()" id="selectsize">
+            <option id="isize" value="isize" selected>Install Size (-R)</option>
+            <option id="csize" value="csize">Cascade Size (-Rc)</option>
+            <option id="cssize" value="cssize">Recursive Size (-Rcs)</option>
+          </select>
+          <div class="mdl-card__menu">
+            <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"
+                    href="https://github.com/farseerfc/pacvis/">
+              <i class="material-icons">help</i>
+            </a>
+          </div>
+        </div>
 
         <div class="mdl-card mdl-shadow--2dp">
           <form method="get" action="/">
