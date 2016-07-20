@@ -30,7 +30,7 @@ function createPkgListDom(list) {
 function selectPkg(node) {
   document.getElementById("pkgname").innerHTML = node.label;
 
-  document.getElementById("fsinfo").style.visibility = "visible";
+  document.getElementById("fsinfo").style.display = "block";
 
   var selectsize = document.getElementById("selectsize");
   document.getElementById("pkgsize").innerHTML =

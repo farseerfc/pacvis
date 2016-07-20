@@ -65,7 +65,7 @@
     </form>
   </div>
 
-  <div class="mdl-card mdl-shadow--2dp"  id="fsinfo"  style="visibility:hidden">
+  <div class="mdl-card mdl-shadow--2dp"  id="fsinfo"  style="display:none">
     <div class="mdl-card__title mdl-card--expand">
         <h3 id="pkgname"></h3>
     </div>
@@ -109,8 +109,6 @@
           <div id="pkgoptdeps"></div>
         </div>
       </div>
-      <!-- <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-              id="togglehide" onclick="togglehide()" style="visibility:hidden"></button> -->
     </div>
   </div>
 </div>
@@ -249,7 +247,7 @@ function pacvis(){
       selectPkg(nodes.get(params.nodes[0]));
   });
   network.on("deselectNode", function (params) {
-    document.getElementById("fsinfo").style.visibility = "hidden";
+    document.getElementById("fsinfo").style.display = "none";
   });
 }
 

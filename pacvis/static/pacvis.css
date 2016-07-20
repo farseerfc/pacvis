@@ -8,11 +8,11 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  width: 400px;
+  width: 360px;
   height: auto;
   max-height: 90%;
   margin: 0 0 0 0;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .panel{
   margin: 30px;
@@ -21,7 +21,7 @@
 }
 .mdl-card {
     margin: 8px;
-    width: 100%;
+    /*width: 100%;*/
     min-height: 100px;
 }
 .mdl-data-table{
