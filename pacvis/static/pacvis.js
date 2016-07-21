@@ -21,8 +21,8 @@ function createPkgListDom(list) {
   if (list == "")
     return "";
   for (let dep of list.split(", ")) {
-    depsdom += "<button onclick='document.getElementById(\"search\").value=\"" +
-               dep + "\";trysearch()'>" + dep + "</button>";
+    depsdom += "<a href=\"#\" onclick='document.getElementById(\"search\").value=\"" +
+               dep + "\";trysearch()'>" + dep + "</a> ";
   }
   return depsdom;
 }

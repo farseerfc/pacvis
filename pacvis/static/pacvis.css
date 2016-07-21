@@ -35,3 +35,6 @@
 .mdl-data-table{
   border: 0px;
 }
+.mdl-tabs a{
+  color: rgba(0,0,0,.54);
+}
