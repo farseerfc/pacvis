@@ -24,7 +24,7 @@
       <div class="mdl-layout-spacer"></div>
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
                   mdl-textfield--floating-label mdl-textfield--align-right"
-           style="color:#fff">
+           id="searchwrapper" style="color:#fff">
         <label class="mdl-button mdl-js-button mdl-button--icon" for="search">
           <i class="material-icons">search</i>
         </label>
@@ -247,6 +247,12 @@ function pacvis(){
   });
   network.on("deselectNode", function (params) {
     document.getElementById("fsinfo").style.display = "none";
+    // hide search content
+    document.getElementById("search").value = "";
+    document.getElementById("searchwrapper").className =
+      document.getElementById("searchwrapper").className.replace(/\bis-dirty\b/,'');
+    document.getElementById("searchwrapper").className =
+      document.getElementById("searchwrapper").className.replace(/\bis-focused\b/,'');
   });
 }
 
