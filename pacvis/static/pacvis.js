@@ -32,10 +32,7 @@ function selectPkg(node) {
 
   document.getElementById("fsinfo").style.display = "block";
 
-  var selectsize = document.getElementById("selectsize");
-  document.getElementById("pkgsize").innerHTML =
-      selectsize.options[selectsize.selectedIndex].text + ": " +
-      filesize(node[selectsize.value]);
+  document.getElementById("pkgsize").innerHTML = document.querySelector('#currentsizedesc').value + ": " + filesize(node[currentsize]);
   let reason = node.group == "normal" ? "as a dependency" : "explicitly";
   document.getElementById("pkgreason").innerHTML = reason;
   document.getElementById("pkgversion").innerHTML = node.version;
@@ -85,9 +82,8 @@ function trysearch() {
   }
 }
 
-function switchsize() {
-  let selectsize = document.getElementById("selectsize");
-  let size = selectsize.options[selectsize.selectedIndex].value;
+
+function switchsizeto(size){
   let pkgname = document.getElementById("pkgname").innerHTML;
   for (let node of nodes.get()) {
     nodes.update({id : node.id, value : size2value(node[size])});

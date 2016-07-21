@@ -19,7 +19,8 @@
 <div id="leftpanel" class="leftpanel">
 
   <div class="demo-card-event mdl-card mdl-shadow--4dp">
-    <div class="mdl-card__title mdl-card--expand" style="background-color: rgb(103,58,183); color: #fff">
+    <div class="mdl-card__title mdl-card--expand"
+        style="background-color: rgb(103,58,183); color: #fff; padding: 16px 16px 0 16px;">
       <h3 style="color:#fff">PacVis</h3>
       <div class="mdl-layout-spacer"></div>
       <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
@@ -33,13 +34,21 @@
         </div>
       </div>
     </div>
-    <div class="mdl-card__title mdl-card--expand" style="background-color: rgb(103,58,183); color: #fff">
+    <div class="mdl-card__title mdl-card--expand"
+         style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 16px 16px;">
       <div class="mdl-layout-spacer"></div>
-      <select id="selectsize">
-        <option id="isize" value="isize" selected>Install Size (-R)</option>
-        <option id="csize" value="csize">Cascade Size (-Rc)</option>
-        <option id="cssize" value="cssize">Recursive Size (-Rcs)</option>
-      </select>
+      <input type="text" class="mdl-textfield__input" id="currentsizedesc"
+            value="Install Size (-R)" readonly></input>
+      <button id="selectsize-menu"
+        class="mdl-button mdl-js-button mdl-button--icon">
+        <i class="material-icons">arrow_drop_down</i>
+      </button>
+      <ul class="mdl-menu mdl-menu--top-right mdl-js-menu mdl-js-ripple-effect"
+          data-mdl-for="selectsize-menu">
+        <li id="isize" class="mdl-menu__item">Install Size (-R)</li>
+        <li id="csize" class="mdl-menu__item">Cascade Size (-Rc)</li>
+        <li id="cssize" class="mdl-menu__item">Recursive Size (-Rcs)</li>
+      </ul>
     </div>
     <div id="loading_progress" class="mdl-progress mdl-js-progress" style="width:100%"></div>
     <form method="get" action="/">
@@ -81,7 +90,7 @@
         <div class="mdl-tabs__panel is-active" id="info-panel">
           <table class="mdl-data-table mdl-js-data-table">
             <tr>
-              <th class="mdl-data-table__cell--non-numeric">Topology Level</th>
+              <th class="mdl-data-table__cell--non-numeric">Topo Level</th>
               <td id="pkglevel" class="mdl-data-table__cell--non-numeric"></td>
             </tr>
             <tr>
@@ -115,6 +124,8 @@
 
 <script type="text/javascript">
 
+var currentsize="isize";
+
 var nodedata = [
   {% for node in nodes %}
     {
@@ -137,10 +148,10 @@ var nodedata = [
 for(let nodeid in nodedata){
   let node = nodedata[nodeid];
   node.title = "<h4>" + node.label + "</h4>" +
-    "<p>installed size: " + filesize(node.isize) + "</p>" +
+    "<p>installed size: " + filesize(node[currentsize]) + "</p>" +
     "<p>depends: [" + node.deps + "]</p>" +
     "<p>required by:[" + node.reqs +"]</p>";
-  node.value = size2value(node.isize);
+  node.value = size2value(node[currentsize]);
 }
 
 var nodes = new vis.DataSet(nodedata);
@@ -259,11 +270,24 @@ function pacvis(){
 
 
 document.querySelector('#search').addEventListener('input', trysearch);
-document.querySelector('#selectsize').addEventListener('change', switchsize);
 document.querySelector('#close_button').addEventListener('click', close_panel);
 document.querySelector('#leftpanel_show').addEventListener('click', show_panel);
 document.querySelector('#loading_progress').addEventListener('mdl-componentupgraded', pacvis);
-
+document.querySelector('#isize').addEventListener('click', function(){
+  currentsize = "isize";
+  document.querySelector('#currentsizedesc').value = this.innerText;
+  switchsizeto("isize");
+});
+document.querySelector('#csize').addEventListener('click', function(){
+  currentsize = "csize";
+  document.querySelector('#currentsizedesc').value = this.innerText;
+  switchsizeto("csize");
+});
+document.querySelector('#cssize').addEventListener('click', function(){
+  currentsize = "cssize";
+  document.querySelector('#currentsizedesc').value = this.innerText;
+  switchsizeto("cssize");
+});
 
 </script>
 
