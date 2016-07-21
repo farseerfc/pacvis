@@ -4,6 +4,14 @@
   margin: 0 0 0 0;
   padding: 0 0 0 0;
 }
+.leftpanel-show{
+  position: absolute;
+  top: 30px;
+  right: 45px;
+  width: 60px;
+  height: 60px;
+  display: none;
+}
 .leftpanel{
   position: absolute;
   top: 20px;

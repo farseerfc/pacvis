@@ -32,7 +32,6 @@ class PkgInfo:
         self.isize = self.pkg.isize
         PkgInfo.all_pkgs[name] = self
 
-
     @classmethod
     def resolve_dependency(cls, dep):
         pkg = cls.localdb.get_pkg(dep)
@@ -166,7 +165,7 @@ class PkgInfo:
                     remove_pkg(dep)
 
         remove_pkg(pkg.name)
-        while len(analyzing_pkg)>0:
+        while len(analyzing_pkg) > 0:
             apkg = cls.all_pkgs[analyzing_pkg.pop()]
             if apkg.name in removing_pkg:
                 continue
@@ -176,7 +175,6 @@ class PkgInfo:
         append_message("cssize %s: %d" % (pkg.name, pkg.cssize))
         return pkg.cssize
 
-
     @classmethod
     def calcSizes(cls):
         start_message("Calculating csize ... ")
@@ -185,7 +183,6 @@ class PkgInfo:
         start_message("Calculating cssize ... ")
         maxCsSize = max(cls.calcCsSize(pkg) for pkg in cls.all_pkgs.values())
         print_message("Max csSize: " + str(maxCsSize))
-
 
 
 def test_circle_detection():
@@ -281,8 +278,8 @@ class MainHandler(tornado.web.RequestHandler):
                     links=links,
                     circlelinks=circlelinks,
                     optlinks=optlinks,
-                    options={"maxlevel" : maxlevel,
-                             "maxreqs" : maxreqs})
+                    options={"maxlevel": maxlevel,
+                             "maxreqs": maxreqs})
 
 
 def make_app():

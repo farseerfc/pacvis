@@ -96,3 +96,13 @@ function switchsize() {
     }
   }
 }
+
+function close_panel() {
+  document.querySelector('#leftpanel').style.display = "none";
+  document.querySelector('#leftpanel_show').style.display = "block";
+}
+
+function show_panel() {
+  document.querySelector('#leftpanel').style.display = "block";
+  document.querySelector('#leftpanel_show').style.display = "none";
+}
