@@ -41,6 +41,12 @@
 .mdl-tabs a{
   color: rgba(0,0,0,.54);
 }
+.mdl-tabs__tab{
+  padding: 0 16px;
+}
+.mdl-tabs__panel{
+  padding: 16px 0;
+}
 .mdl-tabs__panel > div{
   display: flex;
   flex-wrap: wrap;

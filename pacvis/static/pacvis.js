@@ -34,7 +34,8 @@ function selectPkg(node) {
   document.getElementById("fsinfo").style.display = "block";
   document.querySelector('#fsinfo').className = "mdl-card mdl-shadow--4dp animated zoomIn";
   document.getElementById("pkgname").innerHTML = node.label;
-  document.getElementById("pkgsize").innerHTML = document.querySelector('#currentsizedesc').value + ": " + filesize(node[currentsize]);
+  document.getElementById("pkgsizedesc").innerHTML = document.querySelector('#currentsizedesc').value;
+  document.getElementById("pkgsize").innerHTML =  filesize(node[currentsize]);
   let reason = node.group == "normal" ? "as a dependency" : "explicitly";
   document.getElementById("pkgreason").innerHTML = reason;
   document.getElementById("pkgversion").innerHTML = node.version;
