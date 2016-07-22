@@ -272,7 +272,7 @@ class MainHandler(tornado.web.RequestHandler):
                                          "from": pkg.id,
                                          "to": PkgInfo.all_pkgs[dep].id})
                         ids += 1
-        print_message("Wrting HTML")
+        print_message("Writing HTML")
         self.render("templates/index.template.html",
                     nodes=nodes,
                     links=links,

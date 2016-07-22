@@ -11,6 +11,7 @@
   width: 60px;
   height: 60px;
   display: none;
+  -vendor-animation-duration: .3s;
 }
 .leftpanel{
   position: absolute;
@@ -21,6 +22,8 @@
   max-height: 90%;
   margin: 0 0 0 0;
   overflow-y: auto;
+  transform-origin: 100% 0%;
+  -vendor-animation-duration: .3s;
 }
 .panel{
   margin: 30px;
@@ -48,4 +51,8 @@
   line-height: 32px;
   padding: 0 8px;
   text-transform: none;
+}
+#fsinfo {
+  transform-origin: 50% 0%;
+  -vendor-animation-duration: .3s;
 }

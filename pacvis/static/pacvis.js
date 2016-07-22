@@ -27,11 +27,13 @@ function createPkgListDom(list) {
   return depsdom;
 }
 
+var deselectTimeout = null;
+
 function selectPkg(node) {
-  document.getElementById("pkgname").innerHTML = node.label;
-
+  clearTimeout(deselectTimeout);
   document.getElementById("fsinfo").style.display = "block";
-
+  document.querySelector('#fsinfo').className = "mdl-card mdl-shadow--4dp animated zoomIn";
+  document.getElementById("pkgname").innerHTML = node.label;
   document.getElementById("pkgsize").innerHTML = document.querySelector('#currentsizedesc').value + ": " + filesize(node[currentsize]);
   let reason = node.group == "normal" ? "as a dependency" : "explicitly";
   document.getElementById("pkgreason").innerHTML = reason;
@@ -41,6 +43,20 @@ function selectPkg(node) {
   document.getElementById("pkgdeps").innerHTML = createPkgListDom(node.deps);
   document.getElementById("pkgreqs").innerHTML = createPkgListDom(node.reqs);
   document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
+}
+
+function deselectPkg(){
+  document.querySelector('#fsinfo').className = "mdl-card mdl-shadow--4dp animated zoomOut";
+  deselectTimeout = setTimeout(function(){
+    document.getElementById("fsinfo").style.display = "none";
+  }, 300);
+
+  // hide search content
+  document.getElementById("search").value = "";
+  document.getElementById("searchwrapper").className =
+    document.getElementById("searchwrapper").className.replace(/\bis-dirty\b/,'');
+  document.getElementById("searchwrapper").className =
+    document.getElementById("searchwrapper").className.replace(/\bis-focused\b/,'');
 }
 
 function togglehide() {
@@ -94,11 +110,16 @@ function switchsizeto(size){
 }
 
 function close_panel() {
-  document.querySelector('#leftpanel').style.display = "none";
+  document.querySelector('#leftpanel').className = "leftpanel animated zoomOut";
   document.querySelector('#leftpanel_show').style.display = "block";
+  document.querySelector('#leftpanel_show').className = "leftpanel-show mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect animated zoomIn";
+  setTimeout(function(){
+    document.querySelector('#leftpanel').style.display = "none";
+  }, 500);
 }
 
 function show_panel() {
   document.querySelector('#leftpanel').style.display = "block";
-  document.querySelector('#leftpanel_show').style.display = "none";
+  document.querySelector('#leftpanel').className = "leftpanel animated zoomIn";
+  document.querySelector('#leftpanel_show').className = "leftpanel-show mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect animated zoomOut";
 }

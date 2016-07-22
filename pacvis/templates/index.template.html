@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="static/material.deep_purple-amber.min.css" />
   <link rel="stylesheet" href="https://fonts.lug.ustc.edu.cn/icon?family=Material+Icons">
   <script defer src="static/material.min.js"></script>
+  <link defer rel="stylesheet" href="static/animate.css">
   <script src="static/pacvis.js"></script>
   <link rel="stylesheet" href="static/pacvis.css">
 </head>
@@ -254,16 +255,10 @@ function pacvis(){
   });
 
   network.on("selectNode", function (params) {
-      selectPkg(nodes.get(params.nodes[0]));
+    selectPkg(nodes.get(params.nodes[0]));
   });
   network.on("deselectNode", function (params) {
-    document.getElementById("fsinfo").style.display = "none";
-    // hide search content
-    document.getElementById("search").value = "";
-    document.getElementById("searchwrapper").className =
-      document.getElementById("searchwrapper").className.replace(/\bis-dirty\b/,'');
-    document.getElementById("searchwrapper").className =
-      document.getElementById("searchwrapper").className.replace(/\bis-focused\b/,'');
+    deselectPkg();
   });
 }
 
