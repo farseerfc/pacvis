@@ -38,7 +38,14 @@
 .mdl-tabs a{
   color: rgba(0,0,0,.54);
 }
-.mdl-tabs__panel {
-  text-align: justify;
-  line-height: 150%;
+.mdl-tabs__panel > div{
+  display: flex;
+  flex-wrap: wrap;
+}
+.mdl-tabs__panel button{
+  flex-grow: 1;
+  height:32px;
+  line-height: 32px;
+  padding: 0 8px;
+  text-transform: none;
 }

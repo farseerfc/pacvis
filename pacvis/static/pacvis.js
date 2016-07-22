@@ -19,9 +19,9 @@ function size2value(size) { return Math.sqrt(Math.sqrt(size)) / 5; }
 function createPkgListDom(list) {
   let depsdom = "";
   if (list == "")
-    return "";
+    return "<i>Nothing</i>";
   for (let dep of list.split(", ")) {
-    depsdom += "<a href=\"#\" onclick='document.getElementById(\"search\").value=\"" +
+    depsdom += "<button class=\"mdl-button mdl-js-button mdl-js-ripple-effect\" onclick='document.getElementById(\"search\").value=\"" +
                dep + "\";trysearch()'>" + dep + "</a> ";
   }
   return depsdom;
