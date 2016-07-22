@@ -38,3 +38,7 @@
 .mdl-tabs a{
   color: rgba(0,0,0,.54);
 }
+.mdl-tabs__panel {
+  text-align: justify;
+  line-height: 150%;
+}

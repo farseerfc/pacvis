@@ -225,7 +225,7 @@ var options = {
     timestep: 0.1,
     stabilization: {
       iterations: 300*Math.log(nodes.length),
-      updateInterval: 2*Math.log(nodes.length),
+      updateInterval: Math.log(nodes.length),
     }
   }
 };
