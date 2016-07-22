@@ -40,4 +40,6 @@ layout algorithm is still slow (more than 5 mins).
 - [x] more information from pacman can be intergrated
 - [x] search by package name
 - [ ] show only part of the packages (like `pactree`) instead of filtering by levels
-- [ ] be visually attractive!
+- [x] ~~be visually attractive!~~ applied getmdl theme
+- [ ] be compatible with older browsers (Safari, IE)
+- [ ] make a `python setup.py install` or `PKGBUILD`
