@@ -42,8 +42,11 @@ function selectPkg(node) {
   document.getElementById("pkgdesc").innerHTML = node.desc;
   document.getElementById("pkglevel").innerHTML = node.level;
   document.getElementById("pkgdeps").innerHTML = createPkgListDom(node.deps);
+  document.getElementById("badgedep").setAttribute('data-badge', node.deps=="" ? 0 : node.deps.split(', ').length);
   document.getElementById("pkgreqs").innerHTML = createPkgListDom(node.reqs);
+  document.getElementById("badgereq").setAttribute('data-badge', node.reqs=="" ? 0 : node.reqs.split(', ').length);
   document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
+  document.getElementById("badgeoptdep").setAttribute('data-badge', node.optdeps=="" ? 0 : node.optdeps.split(', ').length);
 }
 
 function deselectPkg(){

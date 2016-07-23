@@ -90,9 +90,15 @@
       <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
         <div class="mdl-tabs__tab-bar">
             <a href="#info-panel" title="Informations" class="mdl-tabs__tab is-active">Info</a>
-            <a href="#dep-panel" title="Dependencies" class="mdl-tabs__tab">Dep</a>
-            <a href="#req-panel" title="Packages that depends on this" class="mdl-tabs__tab">Req-By</a>
-            <a href="#opt-panel" title="Optional dependencies" class="mdl-tabs__tab">Opt-Dep</a>
+            <a href="#dep-panel" title="Dependencies" class="mdl-tabs__tab">
+              <span class="mdl-badge" data-badge="4" id="badgedep">Dep</span>
+            </a>
+            <a href="#req-panel" title="Packages that depends on this" class="mdl-tabs__tab">
+              <span class="mdl-badge" data-badge="4" id="badgereq">Req-By</span>
+            </a>
+            <a href="#opt-panel" title="Optional dependencies" class="mdl-tabs__tab">
+              <span class="mdl-badge" data-badge="4" id="badgeoptdep">Opt-Dep</span>
+            </a>
         </div>
 
         <div class="mdl-tabs__panel is-active" id="info-panel">
