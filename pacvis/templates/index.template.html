@@ -128,7 +128,18 @@
     </div>
   </div>
 </div>
-
+<button id="zoomin" title="Zoom In"
+        class="zoomin mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+  <i class="material-icons">add</i>
+</button>
+<button id="zoomout" title="Zoom Out"
+        class="zoomout mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+  <i class="material-icons">remove</i>
+</button>
+<button id="zoomfit" title="Zoom to fit all"
+        class="zoomfit mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+  <i class="material-icons">zoom_out_map</i>
+</button>
 
 <script type="text/javascript">
 
@@ -292,6 +303,17 @@ document.querySelector('#cssize').addEventListener('click', function(){
   switchsizeto("cssize");
 });
 
+document.querySelector('#zoomin').addEventListener('click', function(){
+  network.moveTo({'scale': network.getScale()*2, animation : {duration : 300}});
+});
+
+document.querySelector('#zoomout').addEventListener('click', function(){
+  network.moveTo({'scale': network.getScale()*0.5, animation : {duration : 300}});
+});
+
+document.querySelector('#zoomfit').addEventListener('click', function(){
+  network.fit({animation : {duration : 300}});
+});
 </script>
 
 </body>

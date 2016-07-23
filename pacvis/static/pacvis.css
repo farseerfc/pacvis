@@ -7,11 +7,33 @@
 .leftpanel-show{
   position: absolute;
   top: 30px;
-  right: 45px;
+  right: 25px;
   width: 60px;
   height: 60px;
   display: none;
-  -vendor-animation-duration: .3s;
+  animation-duration: .3s;
+  -webkit-animation-duration: .3s;
+}
+.zoomin{
+  position: absolute;
+  bottom: 20px;
+  right: 100px;
+  width: 60px;
+  height: 60px;
+}
+.zoomout{
+  position: absolute;
+  bottom: 20px;
+  right: 180px;
+  width: 60px;
+  height: 60px;
+}
+.zoomfit{
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
 }
 .leftpanel{
   position: absolute;
@@ -19,11 +41,10 @@
   right: 20px;
   width: 360px;
   height: auto;
-  max-height: 90%;
   margin: 0 0 0 0;
-  overflow-y: auto;
   transform-origin: 100% 0%;
-  -vendor-animation-duration: .3s;
+  animation-duration: .3s;
+  -webkit-animation-duration: .3s;
 }
 .panel{
   margin: 30px;
@@ -32,7 +53,7 @@
 }
 .mdl-card {
     margin: 8px;
-    /*width: 100%;*/
+    width: 350px;
     min-height: 100px;
 }
 .mdl-data-table{
@@ -60,5 +81,9 @@
 }
 #fsinfo {
   transform-origin: 50% 0%;
-  -vendor-animation-duration: .3s;
+  animation-duration: .3s;
+  -webkit-animation-duration: .3s;
+
+  max-height: calc(100vh - 400px);
+  overflow-y: auto;
 }
