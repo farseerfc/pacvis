@@ -2,15 +2,16 @@
 
 pkgname=pacvis-git
 _pkgname=pacvis
-pkgver=0
+pkgver=r77.863ac32
 pkgrel=1
 pkgdesc="Visualize pacman local database using Vis.js, inspired by pacgraph"
 arch=('any')
 url="https://github.com/farseerfc/pacvis"
 license=('MIT')
-depends=('python-tornado' 'pyalpm')
+depends=('python-tornado' 'pyalpm' 'python-setuptools')
+makedepends=('git')
 source=("git+https://github.com/farseerfc/pacvis.git")
-conflict=("pacvis")
+conflicts=("pacvis")
 sha512sums=('SKIP')
 
 pkgver() {

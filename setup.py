@@ -12,8 +12,7 @@ setup(name='PacVis',
       package_data={'pacvis': ['templates/index.template.html',
                                'static/*'
                                ]},
-      entry_points = {
-          'setuptools.installation': ['pacvis = pacvis.pacvis:main']
+      entry_points={
+          'console_scripts': ['pacvis = pacvis.pacvis:main']
       },
-
      )
