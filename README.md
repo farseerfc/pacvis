@@ -10,16 +10,15 @@ See a live demo at https://pacvis.farseerfc.me/ showing database of my arch serv
 
 ## How to use
 
-Install dependencies:
+Install from AUR using any aurhelper (eg `yaourt`):
 ```bash
-pacman -S python-tornado pyalpm
+yaourt -S pacvis-git
 ```
 
 Then
 
 ```bash
-cd pacvis
-./pacvis
+pacvis
 ```
 
 Then go to http://localhost:8888/ .
