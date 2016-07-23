@@ -17,8 +17,9 @@ pacman -S python-tornado pyalpm
 
 Then
 
-```python
-python pacvis.py
+```bash
+cd pacvis
+./pacvis
 ```
 
 Then go to http://localhost:8888/ .
