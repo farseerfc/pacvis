@@ -8,7 +8,7 @@ import pyalpm
 import tornado.ioloop
 import tornado.web
 
-from console import start_message, append_message, print_message
+from .console import start_message, append_message, print_message
 
 
 class PkgInfo:
@@ -294,8 +294,11 @@ def make_app():
         ], debug=True,
         static_path=os.path.join(os.path.dirname(__file__), "static"))
 
-if __name__ == "__main__":
+def main():
     app = make_app()
     app.listen(8888)
     print_message("Start PacVis at http://localhost:8888/")
     tornado.ioloop.IOLoop.current().start()
+
+if __name__ == "__main__":
+    main()
