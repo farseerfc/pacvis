@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import math
 import random
 from itertools import groupby
