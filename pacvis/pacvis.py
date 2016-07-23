@@ -83,7 +83,7 @@ class PkgInfo:
                 strongconnect(pkg)
 
     @classmethod
-    def topology_sort(cls):
+    def topology_sort(cls, usemagic):
         remain_pkgs = {x for x in cls.all_pkgs}
         start_message("Sorting ")
         while len(remain_pkgs) > 0:
@@ -97,11 +97,13 @@ class PkgInfo:
                     cls.get(pkg).level = 0
                 continue
             max_level = max(cls.get(x).level for x in cls.get(pkg).deps) + 1
-            # below is magic
-            new_level = max_level + int(math.log(1 +
-                                                 len(cls.get(pkg).deps) +
-                                                 len(cls.get(pkg).requiredby)))
-            # new_level = max_level  # we may not need magic at all
+            if usemagic:
+                # below is magic
+                new_level = max_level + int(math.log(1 +
+                                                     len(cls.get(pkg).deps) +
+                                                     len(cls.get(pkg).requiredby)))
+            else:
+                new_level = max_level  # we may not need magic at all
             if new_level != origin_level:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
@@ -206,6 +208,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         maxlevel = int(self.get_argument("maxlevel", "1000"))
         maxreqs = int(self.get_argument("maxreqs", "10000"))
+        usemagic = (int(self.get_argument("usemagic", "1")) != 0)
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache
@@ -216,7 +219,7 @@ class MainHandler(tornado.web.RequestHandler):
         start_message("Finding all dependency circles ... ")
         PkgInfo.find_circles()
         append_message("done")
-        PkgInfo.topology_sort()
+        PkgInfo.topology_sort(usemagic)
         PkgInfo.calcSizes()
 
         start_message("Rendering ... ")

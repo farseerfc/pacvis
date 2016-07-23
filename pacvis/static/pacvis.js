@@ -92,7 +92,7 @@ function trysearch() {
         network.focus(node.id, {
           scale : Math.log(nodes.length) / 5,
           locked : false,
-          animation : {duration : 300, easingFunction : "linear"}
+          animation : {duration : 300}
         });
       }
     }
