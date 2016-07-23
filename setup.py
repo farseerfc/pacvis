@@ -9,8 +9,8 @@ setup(name='PacVis',
       author_email='farseerfc@archlinuxcn.org',
       url='https://pacvis.farseerfc.me/',
       packages=['pacvis'],
-      scripts=['pacvis/pacvis'],
-      package_data={'pacvis': ['template/index.template.html',
+      scripts=['pacvis/pacvis.py'],
+      package_data={'pacvis': ['templates/index.template.html',
                                'static/*'
                                ]},
 
