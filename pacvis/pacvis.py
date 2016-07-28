@@ -229,7 +229,21 @@ class MainHandler(tornado.web.RequestHandler):
         nodes = []
         links = []
 
-        ids = 0
+        nodes.append({"id": 0,
+                      "label": "level 0 group",
+                      "level": "-1",
+                      "group": "consolidated",
+                      "isize": "1",
+                      "csize": "1",
+                      "cssize": "1",
+                      "deps": "",
+                      "reqs": "",
+                      "optdeps": "",
+                      "desc": "",
+                      "version": "",
+                      })
+
+        ids = 1
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
             append_message("%s" % pkg.name)
             pkg.id = ids
@@ -258,6 +272,11 @@ class MainHandler(tornado.web.RequestHandler):
         optlinks = []
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
             if pkg.level < maxlevel:
+                if pkg.level == 0:
+                    links.append({"id": ids,
+                                  "from": pkg.id,
+                                  "to": 0})
+                    ids += 1
                 for dep in pkg.deps:
                     if dep not in pkg.circledeps:
                         if len(PkgInfo.all_pkgs[dep].requiredby) < maxreqs:
