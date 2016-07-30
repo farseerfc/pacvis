@@ -211,12 +211,14 @@ class MainHandler(tornado.web.RequestHandler):
         maxlevel = int(self.get_argument("maxlevel", "1000"))
         maxreqs = int(self.get_argument("maxreqs", "10000"))
         usemagic = (self.get_argument("usemagic", "True") != "False")
+        enablephysics = (self.get_argument("enablephysics", "False") != "False")
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache
         print_message("Max level: %d" % maxlevel)
         print_message("Max requied-by: %d" % maxreqs)
         print_message("Use magic: %s" % self.get_argument("usemagic", "default"))
+        print_message("Enable physics: %s" % self.get_argument("enablephysics", "default"))
         start_message("Loading local database ...")
         PkgInfo.find_all()
         append_message("done")
@@ -306,7 +308,8 @@ class MainHandler(tornado.web.RequestHandler):
                     optlinks=optlinks,
                     options={"maxlevel": maxlevel,
                              "maxreqs": maxreqs,
-                             "usemagic": "True" if usemagic else "False"})
+                             "usemagic": "True" if usemagic else "False",
+                             "enablephysics": "True" if enablephysics else "False"})
 
 
 def make_app():
