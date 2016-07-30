@@ -20,7 +20,7 @@
 </button>
 <div id="leftpanel" class="leftpanel">
 
-  <div class="demo-card-event mdl-card mdl-shadow--4dp">
+  <div class="mdl-card mdl-shadow--4dp" id="card-header">
     <div class="mdl-card__title mdl-card--expand"
         style="background-color: rgb(103,58,183); color: #fff; padding: 16px 16px 0 16px;">
       <h3 style="color:#fff">PacVis</h3>
@@ -39,8 +39,9 @@
     <div class="mdl-card__title mdl-card--expand"
          style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 16px 16px;">
       <div class="mdl-layout-spacer"></div>
-      <input type="text" class="mdl-textfield__input" id="currentsizedesc"
-             title="Select shown size"  value="Install Size (-R)" readonly></input>
+      <!-- <input type="text" class="mdl-textfield__input" id="currentsizedesc"
+             title="Select shown size"  value="Install Size (-R)" readonly></input> -->
+      <div id="currentsizedesc">Install Size (-R)</div>
       <button id="selectsize-menu" title="Select shown size"
         class="mdl-button mdl-js-button mdl-button--icon">
         <i class="material-icons">arrow_drop_down</i>
@@ -52,27 +53,48 @@
         <li id="cssize" class="mdl-menu__item">Recursive Size (-Rcs)</li>
       </ul>
     </div>
+    <div class="mdl-card__title mdl-card--expand"
+         style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 16px 16px;">
+      <div class="mdl-layout-spacer"></div>
+      <div>Advanced Options:</div>
+      <button id="advanced_menu" title="Show Advanced options"
+        class="mdl-button mdl-js-button mdl-button--icon">
+        <i class="material-icons">menu</i>
+      </button>
+    </div>
     <div id="loading_progress" class="mdl-progress mdl-js-progress" style="width:100%"></div>
-    <form method="get" action="/">
-      <div class="mdl-card__title mdl-card--expand">
-        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-          <input class="mdl-textfield__input" type="number" id="maxlevel"
-                 title="Limiting max topology level to increase performance"
-                 name="maxlevel" value="{{options['maxlevel']}}" />
-          <label class="mdl-textfield__label" for="maxlevel">Max Level: </label>
+    <div id="advanced_form">
+      <form method="get" action="/">
+        <div class="mdl-card__title mdl-card--expand">
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="number" id="maxlevel"
+                   title="Limiting max topology level to increase performance"
+                   name="maxlevel" value="{{options['maxlevel']}}" />
+            <label class="mdl-textfield__label" for="maxlevel">Max Level: </label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="number" id="maxreqs"
+                    title="Limiting max required-by lines to show a clearer image"
+                    name="maxreqs" value="{{options['maxreqs']}}" />
+            <label class="mdl-textfield__label" for="maxreqs">Max Required-By: </label>
+          </div>
         </div>
-        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-          <input class="mdl-textfield__input" type="number" id="maxreqs"
-                  title="Limiting max required-by lines to show a clearer image"
-                  name="maxreqs" value="{{options['maxreqs']}}" />
-          <label class="mdl-textfield__label" for="maxreqs">Max Required-By: </label>
+        <div class="mdl-card__title mdl-card--expand">
+          <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="usemagic">
+            <input type="hidden" name="usemagic" value="False">
+            <input type="checkbox" id="usemagic" name="usemagic"
+              class="mdl-switch__input"
+              value="True"
+              {% if options['usemagic'] == "True" %} checked {% end %} >
+            <span class="mdl-checkbox__label" style="margin-left: 20px">Randomize topology level</span>
+          </label>
+          <button type="submit" value="Reload" title="Reload the graph"
+                  class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+            <i class="material-icons">refresh</i>
+          </button>
         </div>
-        <button type="submit" value="Reload" title="Reload the graph"
-                class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-          <i class="material-icons">refresh</i>
-        </button>
-      </div>
-    </form>
+      </form>
+    </div>
     <div class="mdl-card__menu" style="color:#fff">
       <a id="close_button" title="Hide Panel"
          class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect">
@@ -133,19 +155,23 @@
       </div>
     </div>
   </div>
+  <div class="leftpanel-space"></div>
+  <div id="zoompanel" class="zoompanel">
+    <button id="zoomin" title="Zoom In"
+            class="zoombtn mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+      <i class="material-icons">add</i>
+    </button>
+    <button id="zoomout" title="Zoom Out"
+            class="zoombtn mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+      <i class="material-icons">remove</i>
+    </button>
+    <button id="zoomfit" title="Zoom to fit all"
+            class="zoombtn mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+      <i class="material-icons">zoom_out_map</i>
+    </button>
+  </div>
 </div>
-<button id="zoomin" title="Zoom In"
-        class="zoomin mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
-  <i class="material-icons">add</i>
-</button>
-<button id="zoomout" title="Zoom Out"
-        class="zoomout mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
-  <i class="material-icons">remove</i>
-</button>
-<button id="zoomfit" title="Zoom to fit all"
-        class="zoomfit mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
-  <i class="material-icons">zoom_out_map</i>
-</button>
+
 
 <script type="text/javascript">
 
@@ -201,10 +227,10 @@ var data = {
 };
 var options = {
   groups: {
-    standalone: { shape: 'square', size: 12 },
-    normal: { shape: 'dot', color: 'rgb(255,171,64)'},
-    explicit: { shape: 'dot', color: 'rgb(103,58,183)'},
-    consolidated: { shape: 'star', color: 'red', size: 12},
+    standalone: { shape: 'square', color: 'rgba(100,100,255,0.8)', size: 12 },
+    normal: { shape: 'dot', color: 'rgba(255,171,64,0.8)'},
+    explicit: { shape: 'dot', color: 'rgba(103,58,183,0.8)'},
+    consolidated: { shape: 'star', color: 'rgba(255,0,0,0.8)', size: 12},
   },
   nodes: {
     scaling: {
@@ -230,7 +256,7 @@ var options = {
   layout: {
      hierarchical: {
          direction: "UD",
-         nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+         nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
          treeSpacing: 50,
          levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*50),
          blockShifting: false,
@@ -243,7 +269,7 @@ var options = {
   physics: {
     maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
     hierarchicalRepulsion: {
-      nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+      nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
       springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*80),
       springConstant: 1,
       damping: 0.1
@@ -292,20 +318,27 @@ function pacvis(){
 document.querySelector('#search').addEventListener('input', trysearch);
 document.querySelector('#close_button').addEventListener('click', close_panel);
 document.querySelector('#leftpanel_show').addEventListener('click', show_panel);
+document.querySelector('#advanced_menu').addEventListener('click', function(){
+  if (document.querySelector('#advanced_form').style.display == "block"){
+    document.querySelector('#advanced_form').style.display = "none";
+  }else{
+    document.querySelector('#advanced_form').style.display = "block";
+  }
+});
 document.querySelector('#loading_progress').addEventListener('mdl-componentupgraded', pacvis);
 document.querySelector('#isize').addEventListener('click', function(){
   currentsize = "isize";
-  document.querySelector('#currentsizedesc').value = this.innerText;
+  document.querySelector('#currentsizedesc').innerText = this.innerText;
   switchsizeto("isize");
 });
 document.querySelector('#csize').addEventListener('click', function(){
   currentsize = "csize";
-  document.querySelector('#currentsizedesc').value = this.innerText;
+  document.querySelector('#currentsizedesc').innerText = this.innerText;
   switchsizeto("csize");
 });
 document.querySelector('#cssize').addEventListener('click', function(){
   currentsize = "cssize";
-  document.querySelector('#currentsizedesc').value = this.innerText;
+  document.querySelector('#currentsizedesc').innerText = this.innerText;
   switchsizeto("cssize");
 });
 

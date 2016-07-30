@@ -210,11 +210,13 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         maxlevel = int(self.get_argument("maxlevel", "1000"))
         maxreqs = int(self.get_argument("maxreqs", "10000"))
-        usemagic = (int(self.get_argument("usemagic", "1")) != 0)
+        usemagic = (self.get_argument("usemagic", "True") != "False")
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache
         print_message("Max level: %d" % maxlevel)
+        print_message("Max requied-by: %d" % maxreqs)
+        print_message("Use magic: %s" % self.get_argument("usemagic", "default"))
         start_message("Loading local database ...")
         PkgInfo.find_all()
         append_message("done")
@@ -303,7 +305,8 @@ class MainHandler(tornado.web.RequestHandler):
                     circlelinks=circlelinks,
                     optlinks=optlinks,
                     options={"maxlevel": maxlevel,
-                             "maxreqs": maxreqs})
+                             "maxreqs": maxreqs,
+                             "usemagic": "True" if usemagic else "False"})
 
 
 def make_app():

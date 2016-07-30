@@ -34,7 +34,7 @@ function selectPkg(node) {
   document.getElementById("fsinfo").style.display = "block";
   document.querySelector('#fsinfo').className = "mdl-card mdl-shadow--4dp animated zoomIn";
   document.getElementById("pkgname").innerHTML = node.label;
-  document.getElementById("pkgsizedesc").innerHTML = document.querySelector('#currentsizedesc').value;
+  document.getElementById("pkgsizedesc").innerHTML = document.querySelector('#currentsizedesc').innerHTML;
   document.getElementById("pkgsize").innerHTML =  filesize(node[currentsize]);
   let reason = node.group == "normal" ? "as a dependency" : "explicitly";
   document.getElementById("pkgreason").innerHTML = reason;
@@ -119,11 +119,11 @@ function close_panel() {
   document.querySelector('#leftpanel_show').className = "leftpanel-show mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect animated zoomIn";
   setTimeout(function(){
     document.querySelector('#leftpanel').style.display = "none";
-  }, 500);
+  }, 300);
 }
 
 function show_panel() {
-  document.querySelector('#leftpanel').style.display = "block";
+  document.querySelector('#leftpanel').style.display = "flex";
   document.querySelector('#leftpanel').className = "leftpanel animated zoomIn";
   document.querySelector('#leftpanel_show').className = "leftpanel-show mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect animated zoomOut";
 }

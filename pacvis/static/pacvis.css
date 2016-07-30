@@ -14,37 +14,32 @@
   animation-duration: .3s;
   -webkit-animation-duration: .3s;
 }
-.zoomin{
-  position: absolute;
-  bottom: 20px;
-  right: 100px;
-  width: 60px;
-  height: 60px;
-}
-.zoomout{
-  position: absolute;
-  bottom: 20px;
-  right: 180px;
-  width: 60px;
-  height: 60px;
-}
-.zoomfit{
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
+
+.zoombtn{
+  margin: 10px;
 }
 .leftpanel{
   position: absolute;
   top: 20px;
   right: 20px;
   width: 360px;
-  height: auto;
+  height: calc(100% - 40px);
   margin: 0 0 0 0;
   transform-origin: 100% 0%;
   animation-duration: .3s;
   -webkit-animation-duration: .3s;
+  display: flex;
+  flex-direction: column;
+  pointer-events:none;
+}
+.leftpanel-space{
+  flex-grow: 1;
+  pointer-events:none;
+}
+.zoompanel{
+  align-self: flex-end;
+  flex-grow: 0;
+  pointer-events: auto;
 }
 .panel{
   margin: 30px;
@@ -52,9 +47,14 @@
   font-family: monospace;
 }
 .mdl-card {
-    margin: 8px;
-    width: 350px;
-    min-height: 100px;
+  margin: 8px;
+  width: 350px;
+  min-height: 100px;
+  pointer-events: auto;
+}
+#card-header {
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 .mdl-data-table{
   border: 0px;
@@ -83,7 +83,11 @@
   transform-origin: 50% 0%;
   animation-duration: .3s;
   -webkit-animation-duration: .3s;
-
-  max-height: calc(100vh - 400px);
   overflow-y: auto;
+}
+#advanced_form{
+  display: none;
+}
+#advanced_form .mdl-card__title {
+  padding: 8px 16px;
 }
