@@ -29,6 +29,14 @@ You may need to zoom-in initially to see the rendered picture.
 issue with a modified vis.js, but when there are more than 2000 packages the
 layout algorithm is still slow (more than 5 mins).
 
+## Running from source repo
+
+```bash
+git clone https://github.com/farseerfc/pacvis.git
+cd pacvis
+python -m pacvis.pacvis
+```
+
 ## To be improved ...
 
 - [ ] performance for layout algorithm can be improved
@@ -42,4 +50,4 @@ layout algorithm is still slow (more than 5 mins).
 - [ ] show only part of the packages (like `pactree`) instead of filtering by levels
 - [x] ~~be visually attractive!~~ applied getmdl theme
 - [ ] be compatible with older browsers (Safari, IE)
-- [ ] make a `python setup.py install` or `PKGBUILD`
+- [x] ~~make a `python setup.py install` or `PKGBUILD`~~ Now on [aur](https://aur.archlinux.org/packages/pacvis-git/)
