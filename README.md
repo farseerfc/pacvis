@@ -3,6 +3,10 @@
 Visualize pacman local database using [Vis.js](http://visjs.org/),
 inspired by [pacgraph](http://kmkeen.com/pacgraph/).
 
+See my blog post for details: https://farseerfc.me/en/pacvis.html
+
+以及中文介紹: https://farseerfc.me/pacvis.html
+
 See a live demo at https://pacvis.farseerfc.me/ showing database of my arch server.
 
 ![full](screenshots/full.png)

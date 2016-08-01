@@ -37,7 +37,7 @@
       </div>
     </div>
     <div class="mdl-card__title mdl-card--expand"
-           style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 0px 16px;">
+           style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 16px 16px;">
       <div>
         Visualize pacman local database using
         <a href="http://visjs.org/">Vis.js</a>,
@@ -48,11 +48,10 @@
         <i class="material-icons">home</i>
       </a>
     </div>
+    <div id="loading_progress" class="mdl-progress mdl-js-progress" style="width:100%"></div>
     <div class="mdl-card__title mdl-card--expand"
-         style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 0px 16px;">
+         style="color: rgb(103,58,183); padding: 16px;">
       <div class="mdl-layout-spacer"></div>
-      <!-- <input type="text" class="mdl-textfield__input" id="currentsizedesc"
-             title="Select shown size"  value="Install Size (-R)" readonly></input> -->
       <div id="currentsizedesc">Install Size (-R)</div>
       <button id="selectsize-menu" title="Select shown size"
         class="mdl-button mdl-js-button mdl-button--icon">
@@ -64,20 +63,18 @@
         <li id="csize" class="mdl-menu__item">Cascade Size (-Rc)</li>
         <li id="cssize" class="mdl-menu__item">Recursive Size (-Rcs)</li>
       </ul>
-    </div>
-    <div class="mdl-card__title mdl-card--expand"
-         style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 16px 16px;">
       <div class="mdl-layout-spacer"></div>
-      <div>Advanced Options:</div>
+      <div>Other Options&nbsp;&nbsp;</div>
       <button id="advanced_menu" title="Show Advanced options"
         class="mdl-button mdl-js-button mdl-button--icon">
         <i class="material-icons">menu</i>
       </button>
     </div>
-    <div id="loading_progress" class="mdl-progress mdl-js-progress" style="width:100%"></div>
+
     <div id="advanced_form">
       <form method="get" action="/">
-        <div class="mdl-card__title mdl-card--expand">
+        <div class="mdl-card__title mdl-card--expand"
+             style="padding: 0 16px 16px 16px;">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
             <input class="mdl-textfield__input" type="number" id="maxlevel"
                    title="Limiting max topology level to increase performance"
