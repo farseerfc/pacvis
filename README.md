@@ -9,8 +9,8 @@ See my blog post for details: https://farseerfc.me/en/pacvis.html
 
 See a live demo at https://pacvis.farseerfc.me/ showing database of my arch server.
 
-![full](screenshots/full.png)
-![zoomin](screenshots/zoomin.png)
+![full](https://img.vim-cn.com/4d/90105c750704af4d586d42be9d10ebe3aa3ded.png)
+![zoomin](https://img.vim-cn.com/c7/1c2d03e238e44f70a9ace3fc1975cd6f90a645.png)
 
 ## How to use
 
