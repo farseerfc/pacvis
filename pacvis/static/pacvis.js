@@ -114,16 +114,16 @@ function switchsizeto(size){
 }
 
 function close_panel() {
-  document.querySelector('#leftpanel').className = "leftpanel animated zoomOut";
+  document.querySelector('#lefttoppanel').className = "lefttoppanel animated zoomOut";
   document.querySelector('#leftpanel_show').style.display = "block";
   document.querySelector('#leftpanel_show').className = "leftpanel-show mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect animated zoomIn";
   setTimeout(function(){
-    document.querySelector('#leftpanel').style.display = "none";
+    document.querySelector('#lefttoppanel').style.display = "none";
   }, 300);
 }
 
 function show_panel() {
-  document.querySelector('#leftpanel').style.display = "flex";
-  document.querySelector('#leftpanel').className = "leftpanel animated zoomIn";
+  document.querySelector('#lefttoppanel').style.display = "flex";
+  document.querySelector('#lefttoppanel').className = "lefttoppanel animated zoomIn";
   document.querySelector('#leftpanel_show').className = "leftpanel-show mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect animated zoomOut";
 }

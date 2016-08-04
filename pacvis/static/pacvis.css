@@ -57,12 +57,18 @@
   width: 360px;
   height: calc(100% - 40px);
   margin: 0 0 0 0;
-  transform-origin: 100% 0%;
-  animation-duration: .3s;
-  -webkit-animation-duration: .3s;
   display: flex;
   flex-direction: column;
   pointer-events:none;
+}
+.lefttoppanel{
+  transform-origin: 100% 0%;
+  animation-duration: .3s;
+  -webkit-animation-duration: .3s;
+  flex-grow: 0;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
 }
 .leftpanel-space{
   flex-grow: 1;
