@@ -6,7 +6,7 @@ from time import gmtime, strftime
 last_message = u""
 head_message = u""
 
-output_log, time_format = "/tmp/pacvis.log", "%Y-%m-%d %H:%M:%S"
+output_log, time_format = "/dev/null", "%Y-%m-%d %H:%M:%S"
 last_line_ended = True
 
 def log_file():
