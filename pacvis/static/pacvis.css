@@ -97,8 +97,9 @@
 .mdl-card__title h3{
   margin: 12px 0;
   font-weight: bold;
-  -webkit-margin-before: 0;
-  -webkit-margin-after: 0;
+}
+.mdl-card__menu{
+  top: 8px;
 }
 #card-header {
   flex-grow: 0;
@@ -140,5 +141,5 @@
   -webkit-animation-duration: .3s;
 }
 #advanced_form .mdl-card__title {
-  padding: 8px 16px;
+  padding: 4px 16px;
 }

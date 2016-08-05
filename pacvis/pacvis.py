@@ -3,6 +3,7 @@
 import math
 import random
 from itertools import groupby
+from types import SimpleNamespace
 
 import pyalpm
 import tornado.ioloop
@@ -144,9 +145,11 @@ class PkgInfo:
         append_message("max available level: %d" % nextlevel)
 
     @classmethod
-    def topology_sort(cls, usemagic):
+    def topology_sort(cls, usemagic, aligntop):
         cls.top_down_sort(usemagic)
         cls.buttom_up_sort()
+        if aligntop:
+            cls.top_down_sort(usemagic) # do top_down_sort again to align to top
         cls.minimize_levels()
 
     @classmethod
@@ -219,25 +222,32 @@ def test_circle_detection():
 
 # Tornado entry
 class MainHandler(tornado.web.RequestHandler):
+
+    def parse_args(self, **kargs):
+        result = {}
+        for key in kargs:
+            if type(kargs[key]) is int:
+                result[key] = int(self.get_argument(key, str(kargs[key])))
+            elif type(kargs[key]) is bool:
+                result[key] = (self.get_argument(key, str(kargs[key])) != "False")
+            else:
+                result[key] = self.get_argument(key, str(kargs[key]))
+            print_message("get arg %r: %r" %(key, result[key]))
+        return result
+
     def get(self):
-        maxlevel = int(self.get_argument("maxlevel", "1000"))
-        maxreqs = int(self.get_argument("maxreqs", "10000"))
-        usemagic = (self.get_argument("usemagic", "False") != "False")
-        enablephysics = (self.get_argument("enablephysics", "False") != "False")
+        print_message("\n"+ str(self.request))
+        args = SimpleNamespace(**self.parse_args(maxlevel=1000, maxreqs=1000, usemagic=False, enablephysics=False, aligntop=False))
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache
-        print_message("Max level: %d" % maxlevel)
-        print_message("Max requied-by: %d" % maxreqs)
-        print_message("Use magic: %s" % self.get_argument("usemagic", "default"))
-        print_message("Enable physics: %s" % self.get_argument("enablephysics", "default"))
         start_message("Loading local database ...")
         PkgInfo.find_all()
         append_message("done")
         start_message("Finding all dependency circles ... ")
         PkgInfo.find_circles()
         append_message("done")
-        PkgInfo.topology_sort(usemagic)
+        PkgInfo.topology_sort(args.usemagic, args.aligntop)
         PkgInfo.calcSizes()
 
         start_message("Rendering ... ")
@@ -264,7 +274,7 @@ class MainHandler(tornado.web.RequestHandler):
             append_message("%s" % pkg.name)
             pkg.id = ids
             ids += 1
-            if pkg.level < maxlevel:
+            if pkg.level < args.maxlevel:
                 group = "normal"
                 if pkg.level == 0:
                     group = "standalone"
@@ -287,7 +297,7 @@ class MainHandler(tornado.web.RequestHandler):
         circlelinks = []
         optlinks = []
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
-            if pkg.level < maxlevel:
+            if pkg.level < args.maxlevel:
                 if pkg.level == 0:
                     links.append({"id": ids,
                                   "from": pkg.id,
@@ -295,7 +305,7 @@ class MainHandler(tornado.web.RequestHandler):
                     ids += 1
                 for dep in pkg.deps:
                     if dep not in pkg.circledeps:
-                        if len(PkgInfo.all_pkgs[dep].requiredby) < maxreqs:
+                        if len(PkgInfo.all_pkgs[dep].requiredby) < args.maxreqs:
                             links.append({"id": ids,
                                           "from": pkg.id,
                                           "to": PkgInfo.all_pkgs[dep].id})
@@ -318,10 +328,7 @@ class MainHandler(tornado.web.RequestHandler):
                     links=links,
                     circlelinks=circlelinks,
                     optlinks=optlinks,
-                    options={"maxlevel": maxlevel,
-                             "maxreqs": maxreqs,
-                             "usemagic": "True" if usemagic else "False",
-                             "enablephysics": "True" if enablephysics else "False"})
+                    options=args.__dict__)
 
 
 def make_app():
