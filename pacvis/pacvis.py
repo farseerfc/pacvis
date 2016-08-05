@@ -210,7 +210,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         maxlevel = int(self.get_argument("maxlevel", "1000"))
         maxreqs = int(self.get_argument("maxreqs", "10000"))
-        usemagic = (self.get_argument("usemagic", "True") != "False")
+        usemagic = (self.get_argument("usemagic", "False") != "False")
         enablephysics = (self.get_argument("enablephysics", "False") != "False")
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()

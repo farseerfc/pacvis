@@ -89,7 +89,6 @@
           </div>
           <div class="mdl-card__title mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="usemagic">
-              <input type="hidden" name="usemagic" value="False">
               <input type="checkbox" id="usemagic" name="usemagic"
                 class="mdl-switch__input"
                 value="True"
@@ -277,9 +276,9 @@ var options = {
   layout: {
      hierarchical: {
          direction: "UD",
-         nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
+         nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*180),
          treeSpacing: 50,
-         levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+         levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*50),
          blockShifting: false,
          edgeMinimization: false,
          parentCentralization: false
@@ -290,8 +289,8 @@ var options = {
   physics: {
     maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
     hierarchicalRepulsion: {
-      nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
-      springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*80),
+      nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*180),
+      springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*10),
       springConstant: 1,
       damping: 0.1
     },
