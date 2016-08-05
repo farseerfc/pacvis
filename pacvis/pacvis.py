@@ -85,7 +85,7 @@ class PkgInfo:
                 strongconnect(pkg)
 
     @classmethod
-    def topology_sort(cls, usemagic):
+    def top_down_sort(cls, usemagic):
         remain_pkgs = {x for x in cls.all_pkgs}
         start_message("Sorting ")
         while len(remain_pkgs) > 0:
@@ -110,6 +110,9 @@ class PkgInfo:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).requiredby)
                                    .difference(cls.get(pkg).circledeps))
+
+    @classmethod
+    def buttom_up_sort(cls):
         remain_pkgs = {x for x in cls.all_pkgs}
         start_message("Resorting ")
         while len(remain_pkgs) > 0:
@@ -128,6 +131,9 @@ class PkgInfo:
                 cls.get(pkg).level = new_level
                 remain_pkgs.update(set(cls.get(pkg).deps)
                                    .difference(cls.get(pkg).circledeps))
+
+    @classmethod
+    def minimize_levels(cls):
         start_message("Minimizing levels ... ")
         pkgs = list(sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level))
         nextlevel = 0
@@ -136,6 +142,12 @@ class PkgInfo:
                 pkg.level = nextlevel
             nextlevel += 1
         append_message("max available level: %d" % nextlevel)
+
+    @classmethod
+    def topology_sort(cls, usemagic):
+        cls.top_down_sort(usemagic)
+        cls.buttom_up_sort()
+        cls.minimize_levels()
 
     @classmethod
     def calcCSize(cls, pkg):
@@ -316,7 +328,7 @@ def make_app():
     import os
     return tornado.web.Application([
         (r"/", MainHandler),
-        ], debug=True,
+        ],
         static_path=os.path.join(os.path.dirname(__file__), "static"))
 
 def main():

@@ -87,8 +87,18 @@
 .mdl-card {
   margin: 8px;
   width: 350px;
-  min-height: 100px;
   pointer-events: auto;
+  transition-property: all;
+  transform-origin: 50% 0%;
+  animation-duration: .3s;
+  -webkit-animation-duration: .3s;
+  min-height: 100px;
+}
+.mdl-card__title h3{
+  margin: 12px 0;
+  font-weight: bold;
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
 }
 #card-header {
   flex-grow: 0;
@@ -125,6 +135,9 @@
 }
 #advanced_form{
   display: none;
+  transform-origin: 50% 0%;
+  animation-duration: .3s;
+  -webkit-animation-duration: .3s;
 }
 #advanced_form .mdl-card__title {
   padding: 8px 16px;
