@@ -205,24 +205,7 @@
 
 var currentsize="isize";
 
-var nodedata = [
-  {% for node in nodes %}
-    {
-      id:       {{node["id"]}} ,
-      label:   '{{node["label"]}}',
-      level:    {{node["level"]}},
-      group:   '{{node["group"]}}',
-      isize:    {{node["isize"]}},
-      csize:    {{node["csize"]}},
-      cssize:    {{node["cssize"]}},
-      deps:    '{{node["deps"]}}',
-      reqs:    '{{node["reqs"]}}',
-      optdeps: '{{node["optdeps"]}}',
-      desc:    '{{node["desc"]}}',
-      version: '{{node["version"]}}',
-    },
-  {% end %}
-];
+var nodedata = {% raw nodes %};
 
 for(let nodeid in nodedata){
   let node = nodedata[nodeid];
@@ -235,17 +218,7 @@ for(let nodeid in nodedata){
 
 var nodes = new vis.DataSet(nodedata);
 
-var edges = new vis.DataSet([
-  {% for link in links %}
-    {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}} },
-  {% end %}
-  {% for link in circlelinks %}
-    {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, color:"red"},
-  {% end %}
-  {% for link in optlinks %}
-    {id:{{link["id"]}}, from: {{link["from"]}}, to: {{link["to"]}}, dashes:true, color:"yellow"},
-  {% end %}
-]);
+var edges = new vis.DataSet({% raw links %});
 
 // create a network
 var container = document.getElementById('target');

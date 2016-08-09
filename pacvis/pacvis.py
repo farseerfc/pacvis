@@ -2,6 +2,7 @@
 
 import math
 import random
+import json
 from itertools import groupby
 from types import SimpleNamespace
 
@@ -294,8 +295,6 @@ class MainHandler(tornado.web.RequestHandler):
                               "version": pkg.pkg.version,
                               })
         ids = 0
-        circlelinks = []
-        optlinks = []
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
             if pkg.level < args.maxlevel:
                 if pkg.level == 0:
@@ -312,22 +311,23 @@ class MainHandler(tornado.web.RequestHandler):
                             ids += 1
                 for dep in pkg.circledeps:
                     if (pkg.id != PkgInfo.all_pkgs[dep].id):
-                        circlelinks.append({"id": ids,
-                                            "to": pkg.id,
-                                            "from": PkgInfo.all_pkgs[dep].id})
+                        links.append({"id": ids,
+                                      "to": pkg.id,
+                                      "from": PkgInfo.all_pkgs[dep].id,
+                                      "color": "red"})
                         ids += 1
                 for dep in pkg.optdeps:
                     if dep in PkgInfo.all_pkgs:
-                        optlinks.append({"id": ids,
-                                         "from": pkg.id,
-                                         "to": PkgInfo.all_pkgs[dep].id})
+                        links.append({"id": ids,
+                                      "from": pkg.id,
+                                      "to": PkgInfo.all_pkgs[dep].id,
+                                      "dashes": True,
+                                      "color": "yellow"})
                         ids += 1
         print_message("Writing HTML")
         self.render("templates/index.template.html",
-                    nodes=nodes,
-                    links=links,
-                    circlelinks=circlelinks,
-                    optlinks=optlinks,
+                    nodes=json.dumps(nodes),
+                    links=json.dumps(links),
                     options=args.__dict__)
 
 
