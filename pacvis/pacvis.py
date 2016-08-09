@@ -14,9 +14,13 @@ from .console import start_message, append_message, print_message
 
 
 class PkgInfo:
-    all_pkgs = {}
-    localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
-    packages = localdb.pkgcache
+
+    @classmethod
+    def cinit(cls):
+        cls.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
+        cls.packages = cls.localdb.pkgcache
+        cls.all_pkgs = {}
+        cls.groups = {}
 
     def __init__(self, name):
         self.name = name
@@ -34,7 +38,16 @@ class PkgInfo:
         self.circledeps = []
         self.explicit = self.pkg.reason == 0
         self.isize = self.pkg.isize
+        self.desc = self.pkg.desc
+        self.version = self.pkg.version
         PkgInfo.all_pkgs[name] = self
+        self.groups = self.pkg.groups
+        for grp in self.groups:
+            if grp in PkgInfo.groups:
+                PkgInfo.groups[grp].add_pkg(self.name)
+            else:
+                GroupInfo(grp)
+                PkgInfo.groups[grp].add_pkg(self.name)
 
     @classmethod
     def resolve_dependency(cls, dep):
@@ -205,6 +218,26 @@ class PkgInfo:
         print_message("Max csSize: " + str(maxCsSize))
 
 
+class GroupInfo (PkgInfo):
+    def __init__(self, name):
+        self.name = name
+        self.deps = []
+        self.requiredby = []
+        self.optdeps = []
+        self.level = 1
+        self.circledeps = []
+        self.explicit = True
+        self.isize = 0
+        self.desc = name + " package group"
+        self.version = ""
+        PkgInfo.groups[name] = self
+        PkgInfo.all_pkgs[name] = self
+
+    def add_pkg(self, pkgname):
+        self.deps.append(pkgname)
+        PkgInfo.all_pkgs[pkgname].requiredby.append(self.name)
+
+
 def test_circle_detection():
     start_message("find all packages...")
     PkgInfo.find_all()
@@ -246,9 +279,7 @@ class MainHandler(tornado.web.RequestHandler):
             aligntop=False,
             disableallphysics=False,
             debugperformance=False))
-        PkgInfo.all_pkgs = {}
-        PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
-        PkgInfo.packages = PkgInfo.localdb.pkgcache
+        PkgInfo.cinit()
         start_message("Loading local database ...")
         PkgInfo.find_all()
         append_message("done")
@@ -275,6 +306,7 @@ class MainHandler(tornado.web.RequestHandler):
                       "optdeps": "",
                       "desc": "",
                       "version": "",
+                      "group": "group"
                       })
 
         ids = 1
@@ -286,6 +318,8 @@ class MainHandler(tornado.web.RequestHandler):
                 group = "normal"
                 if pkg.level == 0:
                     group = "standalone"
+                elif type(pkg) is GroupInfo:
+                    group = "group"
                 elif pkg.explicit:
                     group = "explicit"
                 nodes.append({"id": pkg.id,
@@ -298,8 +332,8 @@ class MainHandler(tornado.web.RequestHandler):
                               "deps": ", ".join(pkg.deps),
                               "reqs": ", ".join(pkg.requiredby),
                               "optdeps": ", ".join(pkg.optdeps),
-                              "desc": pkg.pkg.desc,
-                              "version": pkg.pkg.version,
+                              "desc": pkg.desc,
+                              "version": pkg.version,
                               })
         ids = 0
         for pkg in sorted(PkgInfo.all_pkgs.values(), key=lambda x: x.level):
@@ -342,7 +376,7 @@ def make_app():
     import os
     return tornado.web.Application([
         (r"/", MainHandler),
-        ],
+        ], debug=True,
         static_path=os.path.join(os.path.dirname(__file__), "static"))
 
 def main():

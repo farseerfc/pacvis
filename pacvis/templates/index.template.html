@@ -207,12 +207,28 @@ var currentsize="isize";
 
 var nodedata = {% raw nodes %};
 
+function wrapDeps(list){
+  var depsdom = "";
+  if (list == "")
+    return "<i>Nothing</i>";
+  var count = 0;
+  for (let dep of list.split(", ")) {
+    depsdom += dep + ", ";
+    count++;
+    if(count%10 == 0){
+      depsdom +="<br/>";
+    }
+  }
+  return depsdom;
+}
+
 for(let nodeid in nodedata){
   let node = nodedata[nodeid];
   node.title = "<h4>" + node.label + "</h4>" +
     "<p>installed size: " + filesize(node[currentsize]) + "</p>" +
-    "<p>depends: [" + node.deps + "]</p>" +
-    "<p>required by:[" + node.reqs +"]</p>";
+    "<p>depends: [" + wrapDeps(node.deps) + "]</p>" +
+    "<p>required by:[" + wrapDeps(node.reqs) +"]</p>" +
+    "<p>optdeps:[" + wrapDeps(node.optdeps) +"]</p>";
   node.value = size2value(node[currentsize]);
 }
 
@@ -230,6 +246,7 @@ var options = {
   groups: {
     standalone: { shape: 'square', color: 'rgba(100,100,255,0.8)', size: 12 },
     normal: { shape: 'dot', color: 'rgba(255,171,64,0.8)'},
+    group: { shape: 'triangle', size: 12, color: 'rgba(76,175,80,0.8)'},
     explicit: { shape: 'dot', color: 'rgba(103,58,183,0.8)'},
     consolidated: { shape: 'star', color: 'rgba(255,0,0,0.8)', size: 12},
   },
@@ -267,7 +284,7 @@ var options = {
     improvedLayout: true
   },
   interaction: {
-    keyboard: true,
+    keyboard: {bindToWindow: false},
     hideEdgesOnDrag: true
   },
   {% if options.disableallphysics %}
@@ -322,8 +339,9 @@ function pacvis(){
   network.on("deselectNode", function (params) {
     deselectPkg();
   });
-
-  network.on("click", neighbourhoodHighlight);
+  network.on("click", function(params){
+    neighbourhoodHighlight(params);
+  })
 }
 
 

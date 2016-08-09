@@ -14,7 +14,7 @@ function filesize(size) {
   }
 }
 
-function size2value(size) { return Math.sqrt(Math.sqrt(size)) / 5; }
+function size2value(size) { return size==0 ? 12 : Math.sqrt(Math.sqrt(size)) / 5; }
 
 function createPkgListDom(list) {
   let depsdom = "";
@@ -126,7 +126,6 @@ function selectPkg(node) {
   document.getElementById("badgereq").setAttribute('data-badge', node.reqs=="" ? 0 : node.reqs.split(', ').length);
   document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
   document.getElementById("badgeoptdep").setAttribute('data-badge', node.optdeps=="" ? 0 : node.optdeps.split(', ').length);
-
 }
 
 function deselectPkg(){
@@ -141,7 +140,6 @@ function deselectPkg(){
     document.getElementById("searchwrapper").className.replace(/\bis-dirty\b/,'');
   document.getElementById("searchwrapper").className =
     document.getElementById("searchwrapper").className.replace(/\bis-focused\b/,'');
-
 }
 
 function togglehide() {
