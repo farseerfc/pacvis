@@ -168,6 +168,10 @@
                 <th class="mdl-data-table__cell--non-numeric">Install reason</th>
                 <td id="pkgreason" class="mdl-data-table__cell--non-numeric"></td>
               </tr>
+              <tr>
+                <th class="mdl-data-table__cell--non-numeric">Groups</th>
+                <td id="pkggroups" class="mdl-data-table__cell--non-numeric"></td>
+              </tr>
             </table>
           </div>
           <div class="mdl-tabs__panel" id="dep-panel">
@@ -226,6 +230,7 @@ for(let nodeid in nodedata){
   let node = nodedata[nodeid];
   node.title = "<h4>" + node.label + "</h4>" +
     "<p>installed size: " + filesize(node[currentsize]) + "</p>" +
+    "<p>groups: [" + wrapDeps(node.groups) + "]</p>" +
     "<p>depends: [" + wrapDeps(node.deps) + "]</p>" +
     "<p>required by:[" + wrapDeps(node.reqs) +"]</p>" +
     "<p>optdeps:[" + wrapDeps(node.optdeps) +"]</p>";

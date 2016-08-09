@@ -215,6 +215,7 @@ class GroupInfo (PkgInfo):
         self.optdeps = []
         self.level = 1
         self.circledeps = []
+        self.groups = []
         self.explicit = True
         self.isize = 0
         self.desc = name + " package group"
@@ -297,7 +298,8 @@ class MainHandler(tornado.web.RequestHandler):
                       "optdeps": "",
                       "desc": "",
                       "version": "",
-                      "group": "group"
+                      "group": "group",
+                      "groups": ""
                       })
 
         ids = 1
@@ -323,6 +325,7 @@ class MainHandler(tornado.web.RequestHandler):
                               "deps": ", ".join(pkg.deps),
                               "reqs": ", ".join(pkg.requiredby),
                               "optdeps": ", ".join(pkg.optdeps),
+                              "groups": ", ".join(pkg.groups),
                               "desc": pkg.desc,
                               "version": pkg.version,
                               })

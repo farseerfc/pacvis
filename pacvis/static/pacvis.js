@@ -126,6 +126,7 @@ function selectPkg(node) {
   document.getElementById("badgereq").setAttribute('data-badge', node.reqs=="" ? 0 : node.reqs.split(', ').length);
   document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
   document.getElementById("badgeoptdep").setAttribute('data-badge', node.optdeps=="" ? 0 : node.optdeps.split(', ').length);
+  document.getElementById("pkggroups").innerHTML = createPkgListDom(node.groups);
 }
 
 function deselectPkg(){
