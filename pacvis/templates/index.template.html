@@ -267,7 +267,8 @@ var options = {
     improvedLayout: true
   },
   interaction: {
-    keyboard: true
+    keyboard: true,
+    hideEdgesOnDrag: true
   },
   {% if options.disableallphysics %}
   physics: false
@@ -321,6 +322,8 @@ function pacvis(){
   network.on("deselectNode", function (params) {
     deselectPkg();
   });
+
+  network.on("click", neighbourhoodHighlight);
 }
 
 

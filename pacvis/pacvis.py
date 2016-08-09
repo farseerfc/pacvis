@@ -321,7 +321,7 @@ class MainHandler(tornado.web.RequestHandler):
                         links.append({"id": ids,
                                       "to": pkg.id,
                                       "from": PkgInfo.all_pkgs[dep].id,
-                                      "color": "red"})
+                                      "color": "rgb(255,0,0)"})
                         ids += 1
                 for dep in pkg.optdeps:
                     if dep in PkgInfo.all_pkgs:
@@ -329,7 +329,7 @@ class MainHandler(tornado.web.RequestHandler):
                                       "from": pkg.id,
                                       "to": PkgInfo.all_pkgs[dep].id,
                                       "dashes": True,
-                                      "color": "yellow"})
+                                      "color": "rgb(255,255,100)"})
                         ids += 1
         print_message("Writing HTML")
         self.render("templates/index.template.html",
