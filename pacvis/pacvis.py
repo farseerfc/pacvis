@@ -238,7 +238,14 @@ class MainHandler(tornado.web.RequestHandler):
 
     def get(self):
         print_message("\n"+ str(self.request))
-        args = SimpleNamespace(**self.parse_args(maxlevel=1000, maxreqs=1000, usemagic=False, enablephysics=False, aligntop=False))
+        args = SimpleNamespace(**self.parse_args(
+            maxlevel=1000,
+            maxreqs=1000,
+            usemagic=False,
+            enablephysics=False,
+            aligntop=False,
+            disableallphysics=False,
+            debugperformance=False))
         PkgInfo.all_pkgs = {}
         PkgInfo.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
         PkgInfo.packages = PkgInfo.localdb.pkgcache
@@ -258,11 +265,11 @@ class MainHandler(tornado.web.RequestHandler):
 
         nodes.append({"id": 0,
                       "label": "level 0 group",
-                      "level": "-1",
-                      "group": "consolidated",
-                      "isize": "1",
-                      "csize": "1",
-                      "cssize": "1",
+                      "level": -1,
+                      "shape": "triangleDown",
+                      "isize": 0,
+                      "csize": 0,
+                      "cssize": 0,
                       "deps": "",
                       "reqs": "",
                       "optdeps": "",
@@ -328,7 +335,7 @@ class MainHandler(tornado.web.RequestHandler):
         self.render("templates/index.template.html",
                     nodes=json.dumps(nodes),
                     links=json.dumps(links),
-                    options=args.__dict__)
+                    options=args)
 
 
 def make_app():

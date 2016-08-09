@@ -76,13 +76,13 @@
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
               <input class="mdl-textfield__input" type="number" id="maxlevel"
                      title="Limiting max topology level to increase performance"
-                     name="maxlevel" value="{{options['maxlevel']}}" />
+                     name="maxlevel" value="{{options.maxlevel}}" />
               <label class="mdl-textfield__label" for="maxlevel">Max Level: </label>
             </div>
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
               <input class="mdl-textfield__input" type="number" id="maxreqs"
                       title="Limiting max required-by lines to show a clearer image"
-                      name="maxreqs" value="{{options['maxreqs']}}" />
+                      name="maxreqs" value="{{options.maxreqs}}" />
               <label class="mdl-textfield__label" for="maxreqs">Max Required-By: </label>
             </div>
           </div>
@@ -91,7 +91,7 @@
               <input type="checkbox" id="usemagic" name="usemagic"
                 class="mdl-switch__input"
                 value="True"
-                {% if options['usemagic'] %} checked {% end %} >
+                {% if options.usemagic %} checked {% end %} >
               <span class="mdl-checkbox__label" style="margin-left: 20px">Randomize topology level</span>
             </label>
           </div>
@@ -100,7 +100,7 @@
               <input type="checkbox" id="enablephysics" name="enablephysics"
                 class="mdl-switch__input"
                 value="True"
-                {% if options['enablephysics'] %} checked {% end %} >
+                {% if options.enablephysics %} checked {% end %} >
               <span class="mdl-checkbox__label" style="margin-left: 20px">Enable physics after stabilized</span>
             </label>
           </div>
@@ -109,7 +109,7 @@
               <input type="checkbox" id="aligntop" name="aligntop"
                 class="mdl-switch__input"
                 value="True"
-                {% if options['aligntop'] %} checked {% end %} >
+                {% if options.aligntop %} checked {% end %} >
               <span class="mdl-checkbox__label" style="margin-left: 20px">Align packages to as high as possible</span>
             </label>
           </div>
@@ -269,7 +269,9 @@ var options = {
   interaction: {
     keyboard: true
   },
-  // physics: false,
+  {% if options.disableallphysics %}
+  physics: false
+  {% else %}
   physics: {
     maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
     hierarchicalRepulsion: {
@@ -284,6 +286,7 @@ var options = {
       updateInterval: Math.log(nodes.length),
     }
   }
+  {% end %}
 };
 
 var network = null;
@@ -291,7 +294,7 @@ var network = null;
 function pacvis(){
   network = new vis.Network(container, data, options);
 
-  var debug_performance = false;
+  var debug_performance = {% if options.debugperformance %} true {% else %} false {% end %};
 
   network.on("startStabilizing", function (params) {
     document.title = 'PacVis';
