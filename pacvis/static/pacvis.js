@@ -120,6 +120,7 @@ function selectPkg(node) {
   document.getElementById("pkgversion").innerHTML = node.version;
   document.getElementById("pkgdesc").innerHTML = node.desc;
   document.getElementById("pkglevel").innerHTML = node.level;
+  document.getElementById("pkgrepo").innerHTML = node.repo;
   document.getElementById("pkgdeps").innerHTML = createPkgListDom(node.deps);
   document.getElementById("badgedep").setAttribute('data-badge', node.deps=="" ? 0 : node.deps.split(', ').length);
   document.getElementById("pkgreqs").innerHTML = createPkgListDom(node.reqs);

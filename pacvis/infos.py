@@ -1,15 +1,25 @@
 from itertools import groupby
 
 import pyalpm
+import pycman
 
 from .console import start_message, append_message, print_message
 
 class DbInfo:
     def __init__(self):
-        self.localdb = pyalpm.Handle("/", "/var/lib/pacman").get_localdb()
+        self.handle = pycman.config.init_with_config("/etc/pacman.conf")
+        self.localdb = self.handle.get_localdb()
+        self.syncdbs = self.handle.get_syncdbs()
         self.packages = self.localdb.pkgcache
         self.all_pkgs = {}
         self.groups = {}
+
+    def find_syncdb(self, pkgname):
+        repos = dict((db.name,db) for db in self.syncdbs)
+        found, pkg = pycman.action_sync.find_sync_package(pkgname, repos)
+        if found:
+            return pkg.db.name
+        return self.localdb.name
 
     def get(self, pkgname):
         return self.all_pkgs[pkgname]
@@ -189,6 +199,7 @@ class PkgInfo:
         self.isize = self.pkg.isize
         self.desc = self.pkg.desc
         self.version = self.pkg.version
+        self.repo = dbinfo.find_syncdb(self.name)
         dbinfo.all_pkgs[name] = self
         self.groups = self.pkg.groups
         for grp in self.groups:
@@ -212,6 +223,7 @@ class GroupInfo (PkgInfo):
         self.isize = 0
         self.desc = name + " package group"
         self.version = ""
+        self.repo = ""
         self.dbinfo = dbinfo
         self.dbinfo.groups[name] = self
         self.dbinfo.all_pkgs[name] = self

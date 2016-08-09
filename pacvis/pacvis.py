@@ -94,6 +94,7 @@ class MainHandler(tornado.web.RequestHandler):
                               "groups": ", ".join(pkg.groups),
                               "desc": pkg.desc,
                               "version": pkg.version,
+                              "repo": pkg.repo,
                               })
         ids = 0
         for pkg in sorted(dbinfo.all_pkgs.values(), key=lambda x: x.level):
