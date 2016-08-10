@@ -121,10 +121,9 @@ class DbInfo:
                 remain_pkgs.update(all_pkgs.intersection(set(self.get(pkg).deps)
                                    .difference(self.get(pkg).circledeps)))
 
-    def minimize_levels(self, all_pkgs):
+    def minimize_levels(self, all_pkgs, nextlevel):
         start_message("Minimizing levels ... ")
         pkgs = list(sorted((self.get(pkg) for pkg in all_pkgs), key=lambda x: x.level))
-        nextlevel = min(x.level for x in pkgs if x.level > 0)
         for key, group in groupby(pkgs, key=lambda x: x.level):
             for pkg in group:
                 pkg.level = nextlevel
@@ -146,7 +145,7 @@ class DbInfo:
             self.buttom_up_sort(all_pkgs)
             if aligntop:
                 self.top_down_sort(usemagic, all_pkgs) # do top_down_sort again to align to top
-            self.minimize_levels(all_pkgs)
+            self.minimize_levels(all_pkgs, 1)
         else:
             nextlevel = 1
             for repo in self.repo_list:
@@ -158,7 +157,7 @@ class DbInfo:
                 self.buttom_up_sort(all_pkgs)
                 if aligntop:
                     self.top_down_sort(usemagic, all_pkgs) # do top_down_sort again to align to top
-                nextlevel = self.minimize_levels(all_pkgs)
+                nextlevel = self.minimize_levels(all_pkgs, nextlevel)
         
 
 
