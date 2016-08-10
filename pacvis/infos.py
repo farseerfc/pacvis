@@ -14,6 +14,9 @@ class DbInfo:
         self.all_pkgs = {}
         self.groups = {}
         self.repos = {}
+        self.repo_list = [x.name for x in self.syncdbs]
+        self.repo_list.append(self.localdb.name)
+        self.repos[self.localdb.name] = RepoInfo(self.localdb.name, self)
         print_message("Enabled repos: %s" % ", ".join(db.name for db in self.syncdbs))
 
     def find_syncdb(self, pkgname):
@@ -145,10 +148,8 @@ class DbInfo:
                 self.top_down_sort(usemagic, all_pkgs) # do top_down_sort again to align to top
             self.minimize_levels(all_pkgs)
         else:
-            repo_list = [x.name for x in self.syncdbs]
-            repo_list.append(self.localdb.name)
             nextlevel = 1
-            for repo in repo_list:
+            for repo in self.repo_list:
                 print_message("Repo %s" % repo)
                 all_pkgs = self.repos[repo].pkgs
                 for pkg in all_pkgs:
