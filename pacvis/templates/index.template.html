@@ -345,7 +345,11 @@ function pacvis(){
   });
 
   network.on("selectNode", function (params) {
-    selectPkg(nodes.get(params.nodes[0]));
+    // this is to fix a timing issue with chrome
+    // when switching node beyond 2 hoops
+    setTimeout(function (){
+      selectPkg(nodes.get(params.nodes[0]));
+    },1);
   });
   network.on("deselectNode", function (params) {
     deselectPkg();
