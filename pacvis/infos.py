@@ -13,13 +13,20 @@ class DbInfo:
         self.packages = self.localdb.pkgcache
         self.all_pkgs = {}
         self.groups = {}
+        self.repos = {}
+        print_message("Enabled repos: %s" % ", ".join(db.name for db in self.syncdbs))
 
     def find_syncdb(self, pkgname):
         repos = dict((db.name,db) for db in self.syncdbs)
         found, pkg = pycman.action_sync.find_sync_package(pkgname, repos)
         if found:
-            return pkg.db.name
-        return self.localdb.name
+            repo = pkg.db.name
+        else:
+            repo = self.localdb.name
+        if repo not in self.repos:
+            self.repos[repo] = RepoInfo(repo, self)
+        self.repos[repo].add_pkg(pkgname)
+        return repo
 
     def get(self, pkgname):
         return self.all_pkgs[pkgname]
@@ -67,20 +74,20 @@ class DbInfo:
             if pkg not in indexes:
                 strongconnect(pkg)
 
-    def top_down_sort(self, usemagic):
-        remain_pkgs = {x for x in self.all_pkgs}
-        start_message("Sorting ")
+    def top_down_sort(self, usemagic, all_pkgs):
+        remain_pkgs = set(all_pkgs)
+        start_message("Top-down sorting ")
         while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
             origin_level = self.get(pkg).level
             append_message("%s %d (remaining %d)" % (pkg,
                                                      origin_level,
                                                      len(remain_pkgs)))
-            if len(self.get(pkg).deps) == 0:
-                if len(self.get(pkg).requiredby) == 0:
+            if len(all_pkgs.intersection(self.get(pkg).deps)) == 0:
+                if len(self.get(pkg).deps) == 0 and len(self.get(pkg).requiredby) == 0:
                     self.get(pkg).level = 0
                 continue
-            max_level = max(self.get(x).level for x in self.get(pkg).deps) + 1
+            max_level = max(self.get(x).level for x in all_pkgs.intersection(self.get(pkg).deps)) + 1
             if usemagic:
                 # below is magic
                 new_level = max_level + int(math.log(1 +
@@ -90,45 +97,69 @@ class DbInfo:
                 new_level = max_level  # we may not need magic at all
             if new_level != origin_level:
                 self.get(pkg).level = new_level
-                remain_pkgs.update(set(self.get(pkg).requiredby)
-                                   .difference(self.get(pkg).circledeps))
+                remain_pkgs.update(all_pkgs.intersection(set(self.get(pkg).requiredby)
+                                   .difference(self.get(pkg).circledeps)))
 
-    def buttom_up_sort(self):
-        remain_pkgs = {x for x in self.all_pkgs}
-        start_message("Resorting ")
+    def buttom_up_sort(self, all_pkgs):
+        remain_pkgs = set(all_pkgs)
+        start_message("Buttom-up sorting ")
         while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
             origin_level = self.get(pkg).level
             append_message("%s %d (remaining %d)" % (pkg,
                                                      origin_level,
                                                      len(remain_pkgs)))
-            if len(self.get(pkg).requiredby) == 0:
-                if len(self.get(pkg).deps) == 0:
-                    self.get(pkg).level = 0
+            if len(all_pkgs.intersection(self.get(pkg).requiredby)) == 0:
                 continue
-            min_level = min(self.get(x).level for x in self.get(pkg).requiredby)
+            min_level = min(self.get(x).level for x in all_pkgs.intersection(self.get(pkg).requiredby))
             new_level = min_level - 1
             if new_level > origin_level:
                 self.get(pkg).level = new_level
-                remain_pkgs.update(set(self.get(pkg).deps)
-                                   .difference(self.get(pkg).circledeps))
+                remain_pkgs.update(all_pkgs.intersection(set(self.get(pkg).deps)
+                                   .difference(self.get(pkg).circledeps)))
 
-    def minimize_levels(self):
+    def minimize_levels(self, all_pkgs):
         start_message("Minimizing levels ... ")
-        pkgs = list(sorted(self.all_pkgs.values(), key=lambda x: x.level))
-        nextlevel = 0
+        pkgs = list(sorted((self.get(pkg) for pkg in all_pkgs), key=lambda x: x.level))
+        nextlevel = min(x.level for x in pkgs if x.level > 0)
         for key, group in groupby(pkgs, key=lambda x: x.level):
             for pkg in group:
                 pkg.level = nextlevel
             nextlevel += 1
         append_message("max available level: %d" % nextlevel)
+        return nextlevel
 
-    def topology_sort(self, usemagic, aligntop):
-        self.top_down_sort(usemagic)
-        self.buttom_up_sort()
-        if aligntop:
-            self.top_down_sort(usemagic) # do top_down_sort again to align to top
-        self.minimize_levels()
+    def calc_repo_average(self):
+        result = {}
+        for repo in self.repos:
+            result[repo] = self.repos[repo].average_level()
+        return result
+
+
+    def topology_sort(self, usemagic, aligntop, mergerepos):
+        if mergerepos:
+            all_pkgs = {x for x in self.all_pkgs}
+            self.top_down_sort(usemagic, all_pkgs)
+            self.buttom_up_sort(all_pkgs)
+            if aligntop:
+                self.top_down_sort(usemagic, all_pkgs) # do top_down_sort again to align to top
+            self.minimize_levels(all_pkgs)
+        else:
+            repo_list = [x.name for x in self.syncdbs]
+            repo_list.append(self.localdb.name)
+            nextlevel = 1
+            for repo in repo_list:
+                print_message("Repo %s" % repo)
+                all_pkgs = self.repos[repo].pkgs
+                for pkg in all_pkgs:
+                    self.get(pkg).level = nextlevel # assign initial level
+                self.top_down_sort(usemagic, all_pkgs) 
+                self.buttom_up_sort(all_pkgs)
+                if aligntop:
+                    self.top_down_sort(usemagic, all_pkgs) # do top_down_sort again to align to top
+                nextlevel = self.minimize_levels(all_pkgs)
+        
+
 
     def calcCSize(self, pkg):
         removing_pkg = set()
@@ -223,7 +254,7 @@ class GroupInfo (PkgInfo):
         self.isize = 0
         self.desc = name + " package group"
         self.version = ""
-        self.repo = ""
+        self.repo = None
         self.dbinfo = dbinfo
         self.dbinfo.groups[name] = self
         self.dbinfo.all_pkgs[name] = self
@@ -231,6 +262,22 @@ class GroupInfo (PkgInfo):
     def add_pkg(self, pkgname):
         self.deps.append(pkgname)
         self.dbinfo.get(pkgname).requiredby.append(self.name)
+        # reset group's repo
+        if self.repo and self.name in self.dbinfo.repos[self.repo].pkgs:
+            self.dbinfo.repos[self.repo].pkgs.remove(self.name)
+        self.repo = self.dbinfo.get(pkgname).repo
+        self.dbinfo.repos[self.repo].pkgs.add(self.name)
+
+
+class RepoInfo:
+    def __init__(self, name, dbinfo):
+        self.name = name
+        self.pkgs = set()
+        self.level = -1
+        self.dbinfo = dbinfo
+
+    def add_pkg(self, pkgname):
+        self.pkgs.add(pkgname)
 
 
 def test_circle_detection():

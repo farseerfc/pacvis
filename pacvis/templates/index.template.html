@@ -96,6 +96,15 @@
             </label>
           </div>
           <div class="mdl-card__title mdl-card--expand">
+            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="mergerepos">
+              <input type="checkbox" id="mergerepos" name="mergerepos"
+                class="mdl-switch__input"
+                value="True"
+                {% if options.mergerepos %} checked {% end %} >
+              <span class="mdl-checkbox__label" style="margin-left: 20px">Merge repositories</span>
+            </label>
+          </div>
+          <div class="mdl-card__title mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="enablephysics">
               <input type="checkbox" id="enablephysics" name="enablephysics"
                 class="mdl-switch__input"
@@ -157,6 +166,14 @@
                 <td id="pkglevel" class="mdl-data-table__cell--non-numeric"></td>
               </tr>
               <tr>
+                <th class="mdl-data-table__cell--non-numeric">Repo</th>
+                <td id="pkgrepo" class="mdl-data-table__cell--non-numeric"></td>
+              </tr>
+              <tr>
+                <th class="mdl-data-table__cell--non-numeric">Groups</th>
+                <td id="pkggroups" class="mdl-data-table__cell--non-numeric"></td>
+              </tr>
+              <tr>
                 <th class="mdl-data-table__cell--non-numeric" id="pkgsizedesc">Size</th>
                 <td id="pkgsize" class="mdl-data-table__cell--non-numeric"></td>
               </tr>
@@ -167,14 +184,6 @@
               <tr>
                 <th class="mdl-data-table__cell--non-numeric">Install reason</th>
                 <td id="pkgreason" class="mdl-data-table__cell--non-numeric"></td>
-              </tr>
-              <tr>
-                <th class="mdl-data-table__cell--non-numeric">Groups</th>
-                <td id="pkggroups" class="mdl-data-table__cell--non-numeric"></td>
-              </tr>
-              <tr>
-                <th class="mdl-data-table__cell--non-numeric">Repo</th>
-                <td id="pkgrepo" class="mdl-data-table__cell--non-numeric"></td>
               </tr>
             </table>
           </div>

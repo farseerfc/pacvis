@@ -36,7 +36,8 @@ class MainHandler(tornado.web.RequestHandler):
             enablephysics=False,
             aligntop=False,
             disableallphysics=False,
-            debugperformance=False))
+            debugperformance=False,
+            mergerepos=False))
         dbinfo = DbInfo()
         start_message("Loading local database ...")
         dbinfo.find_all()
@@ -44,7 +45,7 @@ class MainHandler(tornado.web.RequestHandler):
         start_message("Finding all dependency circles ... ")
         dbinfo.find_circles()
         append_message("done")
-        dbinfo.topology_sort(args.usemagic, args.aligntop)
+        dbinfo.topology_sort(args.usemagic, args.aligntop, args.mergerepos)
         dbinfo.calcSizes()
 
         start_message("Rendering ... ")
@@ -53,8 +54,8 @@ class MainHandler(tornado.web.RequestHandler):
         links = []
 
         nodes.append({"id": 0,
-                      "label": "level 0 group",
-                      "level": -1,
+                      "label": "level 1 group",
+                      "level": 0,
                       "shape": "triangleDown",
                       "isize": 0,
                       "csize": 0,
@@ -99,7 +100,7 @@ class MainHandler(tornado.web.RequestHandler):
         ids = 0
         for pkg in sorted(dbinfo.all_pkgs.values(), key=lambda x: x.level):
             if pkg.level < args.maxlevel:
-                if pkg.level == 0:
+                if len(pkg.deps) == 0 and len(pkg.requiredby) == 0:
                     links.append({"id": ids,
                                   "from": pkg.id,
                                   "to": 0})
