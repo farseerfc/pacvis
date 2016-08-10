@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import math
-import random
 import json
 from types import SimpleNamespace
 

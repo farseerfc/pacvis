@@ -1,5 +1,6 @@
 from itertools import groupby
 
+import math
 import pyalpm
 import pycman
 
