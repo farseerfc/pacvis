@@ -129,7 +129,8 @@ class MainHandler(tornado.web.RequestHandler):
         self.render("templates/index.template.html",
                     nodes=json.dumps(nodes),
                     links=json.dumps(links),
-                    options=args)
+                    options=args,
+                    optionsjson=json.dumps(args.__dict__))
 
 
 def make_app():

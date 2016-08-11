@@ -124,7 +124,7 @@
           </div>
           <div class="mdl-card__title mdl-card--expand">
             <div class="mdl-layout-spacer"></div>
-            <button type="submit" value="Reload" title="Reload the graph"
+            <button type="submit" value="Reload" title="Reload the graph" id="reloadbtn"
                     class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
               <i class="material-icons">refresh</i>
             </button>
@@ -369,6 +369,30 @@ function pacvis(){
 }
 
 
+var pacvisopts = {% raw optionsjson %};
+function ifNeedReload(){
+  let need = false;
+  for(key in pacvisopts){
+    let v = pacvisopts[key];
+    let dom = document.querySelector("#"+key);
+    if(dom){
+      let cv = Number.isInteger(v) ? dom.value : dom.checked;
+      need = need || cv != v;
+    }
+  }
+  if(need){
+    document.querySelector('#reloadbtn').className = "mdl-button mdl-js-button mdl-button--raised mdl-button--colored";
+  }else{
+    document.querySelector('#reloadbtn').className = "mdl-button mdl-js-button mdl-button--primary";
+  }
+}
+for(key in pacvisopts){
+  let dom = document.querySelector("#"+key);
+  if(dom) {
+    dom.addEventListener(Number.isInteger(pacvisopts[key]) ? "input" : "change" , ifNeedReload);
+  }
+}
+
 
 document.querySelector('#search').addEventListener('input', trysearch);
 document.querySelector('#close_button').addEventListener('click', close_panel);
@@ -415,6 +439,8 @@ document.querySelector('#zoomout').addEventListener('click', function(){
 document.querySelector('#zoomfit').addEventListener('click', function(){
   network.fit({animation : {duration : 300}});
 });
+
+
 </script>
 
 </body>
