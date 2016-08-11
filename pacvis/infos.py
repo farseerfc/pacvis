@@ -45,6 +45,8 @@ class DbInfo:
     def find_all(self):
         for pkg in self.packages:
             PkgInfo(pkg.name, self)
+        for pkg in self.all_pkgs.values():
+            pkg.find_dependencies(self)
         return self.all_pkgs
 
     def find_circles(self):
@@ -218,15 +220,10 @@ class PkgInfo:
     def __init__(self, name, dbinfo):
         self.name = name
         self.pkg = dbinfo.localdb.get_pkg(name)
-        self.deps = [dbinfo.resolve_dependency(dep).name
-                     for dep in self.pkg.depends]
-        self.requiredby = self.pkg.compute_requiredby()
+        self.deps = []
+        self.requiredby = []
         self.optdeps = []
-        for dep in self.pkg.optdepends:
-            depname = dep.split(":")[0]
-            resolved = dbinfo.resolve_dependency(depname)
-            if resolved is not None:
-                self.optdeps.append(resolved.name)
+        self.provides = self.pkg.provides
         self.level = 1
         self.circledeps = []
         self.explicit = self.pkg.reason == 0
@@ -243,6 +240,16 @@ class PkgInfo:
                 GroupInfo(grp, dbinfo)
                 dbinfo.groups[grp].add_pkg(self.name)
 
+    def find_dependencies(self, dbinfo):
+        for dep in self.pkg.depends:
+            self.deps.append(dbinfo.resolve_dependency(dep).name)
+        for dep in self.pkg.optdepends:
+            depname = dep.split(":")[0]
+            resolved = dbinfo.resolve_dependency(depname)
+            if resolved is not None:
+                self.optdeps.append(resolved.name)
+        self.requiredby.extend(self.pkg.compute_requiredby())
+
 
 class GroupInfo (PkgInfo):
     def __init__(self, name, dbinfo):
@@ -250,6 +257,7 @@ class GroupInfo (PkgInfo):
         self.deps = []
         self.requiredby = []
         self.optdeps = []
+        self.provides = []
         self.level = 1
         self.circledeps = []
         self.groups = []
@@ -270,6 +278,9 @@ class GroupInfo (PkgInfo):
             self.dbinfo.repos[self.repo].pkgs.remove(self.name)
         self.repo = self.dbinfo.get(pkgname).repo
         self.dbinfo.repos[self.repo].pkgs.add(self.name)
+
+    def find_dependencies(self, dbinfo):
+        pass
 
 
 class RepoInfo:

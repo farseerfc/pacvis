@@ -128,6 +128,7 @@ function selectPkg(node) {
   document.getElementById("pkgoptdeps").innerHTML = createPkgListDom(node.optdeps);
   document.getElementById("badgeoptdep").setAttribute('data-badge', node.optdeps=="" ? 0 : node.optdeps.split(', ').length);
   document.getElementById("pkggroups").innerHTML = createPkgListDom(node.groups);
+  document.getElementById("pkgprovides").innerHTML = node.provides;
 }
 
 function deselectPkg(){

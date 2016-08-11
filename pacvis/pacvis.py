@@ -64,7 +64,8 @@ class MainHandler(tornado.web.RequestHandler):
                       "desc": "",
                       "version": "",
                       "group": "group",
-                      "groups": ""
+                      "groups": "",
+                      "provides": "",
                       })
 
         ids = 1
@@ -91,6 +92,7 @@ class MainHandler(tornado.web.RequestHandler):
                               "reqs": ", ".join(pkg.requiredby),
                               "optdeps": ", ".join(pkg.optdeps),
                               "groups": ", ".join(pkg.groups),
+                              "provides": ", ".join(pkg.provides),
                               "desc": pkg.desc,
                               "version": pkg.version,
                               "repo": pkg.repo,
