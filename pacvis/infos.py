@@ -19,6 +19,7 @@ class DbInfo:
         self.repo_list.append(self.localdb.name)
         self.repos[self.localdb.name] = RepoInfo(self.localdb.name, self)
         print_message("Enabled repos: %s" % ", ".join(db.name for db in self.syncdbs))
+        print_message("Repo_list repos: %s" % ", ".join(self.repo_list))
 
     def find_syncdb(self, pkgname):
         repos = dict((db.name,db) for db in self.syncdbs)
@@ -150,6 +151,7 @@ class DbInfo:
         else:
             nextlevel = 1
             for repo in self.repo_list:
+                if repo not in self.repos: continue
                 print_message("Repo %s" % repo)
                 all_pkgs = self.repos[repo].pkgs
                 for pkg in all_pkgs:
