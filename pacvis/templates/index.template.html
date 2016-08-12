@@ -52,6 +52,10 @@
       <div id="loading_progress" class="mdl-progress mdl-js-progress" style="width:100%"></div>
       <div class="mdl-card__title mdl-card--expand"
            style="color: rgb(103,58,183); padding: 16px 16px 8px 16px;">
+        <button id="legend-btn" title="Show Legend"
+          class="mdl-button mdl-js-button mdl-button--icon">
+          <i class="material-icons">help_outline</i>
+        </button>
         <div class="mdl-layout-spacer"></div>
         <div id="currentsizedesc">Install Size (-R)</div>
         <button id="selectsize-menu" title="Select shown size"
@@ -70,6 +74,15 @@
           class="mdl-button mdl-js-button mdl-button--icon">
           <i class="material-icons">menu</i>
         </button>
+      </div>
+      <div class="mdl-card__title mdl-card--expand" id="legend_panel"
+           style="padding: 0 16px 0px 16px;">
+           <div>
+             See legend below, for more details see also
+             <a href="https://farseerfc.me/en/pacvis.html">my blog article</a>
+           </div>
+           <div id="legend_target" style="width:100%; height:300px">
+           </div>
       </div>
 
       <div id="advanced_form">
@@ -276,6 +289,20 @@ var data = {
   nodes: nodes,
   edges: edges
 };
+var physics = {
+  maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
+  hierarchicalRepulsion: {
+    nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*180),
+    springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*10),
+    springConstant: 1,
+    damping: 0.1
+  },
+  timestep: 0.1,
+  stabilization: {
+    iterations: 300*Math.log(nodes.length),
+    updateInterval: Math.log(nodes.length),
+  }
+};
 var options = {
   groups: {
     standalone: { shape: 'square', color: 'rgba(100,100,255,0.8)', size: 12 },
@@ -327,20 +354,7 @@ var options = {
   {% if options.disableallphysics %}
   physics: false
   {% else %}
-  physics: {
-    maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
-    hierarchicalRepulsion: {
-      nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*180),
-      springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*10),
-      springConstant: 1,
-      damping: 0.1
-    },
-    timestep: 0.1,
-    stabilization: {
-      iterations: 300*Math.log(nodes.length),
-      updateInterval: Math.log(nodes.length),
-    }
-  }
+  physics: physics
   {% end %}
 };
 
@@ -382,7 +396,8 @@ function pacvis(){
   });
   network.on("click", function(params){
     neighbourhoodHighlight(params);
-  })
+  });
+
 }
 
 
@@ -421,9 +436,72 @@ document.querySelector('#advanced_menu').addEventListener('click', function(){
     document.querySelector('#advanced_form').style.display = "block";
   }
 });
+document.querySelector('#legend-btn').addEventListener('click', function(){
+  if (document.querySelector('#legend_panel').style.display == "block"){
+    document.querySelector('#legend_panel').style.display = "none";
+  }else{
+    document.querySelector('#legend_panel').style.display = "block";
+    let legend_options = JSON.parse(JSON.stringify(options)); // deep copy
+    legend_options.layout = {
+       hierarchical: {
+           direction: "UD",
+           nodeSpacing: 50,
+           treeSpacing: 50,
+           levelSeparation: 120,
+           blockShifting: false,
+           edgeMinimization: false,
+           parentCentralization: false
+       },
+      improvedLayout: true
+    };
+    legend_options.physics = false;
+    let legend = new vis.Network(document.querySelector("#legend_target"), {
+      nodes: [
+        {
+          id: "normal-legend",
+          label: "packages installed as dependencies",
+          level: 0,
+          group: "normal",
+          value: size2value(0),
+        },
+        {
+          id: "explicit-legend",
+          label: "packages installed explicitly",
+          level: 2,
+          group: "explicit",
+          value: size2value(0),
+        },
+        {
+          id: "group-legend",
+          label: "package groups",
+          level: 4,
+          group: "group",
+          value: size2value(0),
+        },
+        {
+          id: "vdep-legend",
+          label: "virtual dependencies (in provides)",
+          level: 6,
+          group: "vdep",
+          value: size2value(0),
+        },
+      ],
+      edges: [
+        { from: "normal-legend", to: "explicit-legend" },
+        { from: "explicit-legend", to: "group-legend" },
+        { from: "group-legend", to: "vdep-legend" },
+      ]
+    }, legend_options);
+
+    legend.fit();
+    setTimeout(function(){
+      legend.moveTo({scale: legend.getScale()*0.75, animation : {duration : 300}});
+    }, 50);
+  }
+});
 document.querySelector('#enablephysics').addEventListener('change', function(){
   if(this.checked){
-    network.setOptions({physics:options.physics});
+    network.setOptions({physics: physics});
   }else{
     network.setOptions({physics: false});
   }

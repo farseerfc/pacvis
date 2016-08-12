@@ -143,3 +143,6 @@
 #advanced_form .mdl-card__title {
   padding: 4px 16px;
 }
+#legend_panel{
+  display: none;
+}
