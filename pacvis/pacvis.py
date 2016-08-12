@@ -40,7 +40,7 @@ class MainHandler(tornado.web.RequestHandler):
             showallvdeps=False))
         dbinfo = DbInfo()
         start_message("Loading local database ...")
-        dbinfo.find_all()
+        dbinfo.find_all(args.showallvdeps)
         append_message("done")
         start_message("Finding all dependency circles ... ")
         dbinfo.find_circles()
@@ -83,8 +83,8 @@ class MainHandler(tornado.web.RequestHandler):
                     group = "group"
                 elif type(pkg) is VDepInfo:
                     group = "vdep"
-                    if not args.showallvdeps and len(pkg.requiredby) == 0:
-                        continue
+                    # if not args.showallvdeps and len(pkg.requiredby) == 0:
+                    #     continue
                 elif pkg.explicit:
                     group = "explicit"
                 nodes.append({"id": pkg.id,

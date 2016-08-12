@@ -50,11 +50,23 @@ class DbInfo:
             return None
         return pkg.name
 
-    def find_all(self):
+    def find_all(self, showallvdeps):
         for pkg in self.packages:
             PkgInfo(pkg.name, self)
         for pkg in self.all_pkgs.values():
             pkg.find_dependencies(self)
+        if showallvdeps:
+            return self.all_pkgs
+        # remove vdeps without requiredby
+        for pkg in list(self.all_pkgs.values()):
+            if type(pkg) is VDepInfo:
+                if len(pkg.requiredby) == 0:
+                    for dep in pkg.deps:
+                        while pkg.name in self.get(dep).requiredby:
+                            self.get(dep).requiredby.remove(pkg.name)
+                    self.repos[pkg.repo].pkgs.remove(pkg.name)
+                    del self.all_pkgs[pkg.name]
+                    del self.vdeps[pkg.name]
         return self.all_pkgs
 
     def find_circles(self):
