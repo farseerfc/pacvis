@@ -76,10 +76,9 @@
         </button>
       </div>
       <div class="mdl-card__title mdl-card--expand" id="legend_panel"
-           style="padding: 0 16px 0px 16px;">
+           style="padding: 0 16px 16px 16px;">
            <div>
-             See legend below, for more details see also
-             <a href="https://farseerfc.me/en/pacvis.html">my blog article</a>
+             Legend below: <a href="https://farseerfc.me/en/pacvis.html">and for more details</a>
            </div>
            <div id="legend_target" style="width:100%; height:300px">
            </div>
@@ -434,6 +433,7 @@ document.querySelector('#advanced_menu').addEventListener('click', function(){
     document.querySelector('#advanced_form').style.display = "none";
   }else{
     document.querySelector('#advanced_form').style.display = "block";
+    document.querySelector('#legend_panel').style.display = "none";
   }
 });
 document.querySelector('#legend-btn').addEventListener('click', function(){
@@ -441,13 +441,14 @@ document.querySelector('#legend-btn').addEventListener('click', function(){
     document.querySelector('#legend_panel').style.display = "none";
   }else{
     document.querySelector('#legend_panel').style.display = "block";
+    document.querySelector('#advanced_form').style.display = "none";
     let legend_options = JSON.parse(JSON.stringify(options)); // deep copy
     legend_options.layout = {
        hierarchical: {
            direction: "UD",
            nodeSpacing: 50,
            treeSpacing: 50,
-           levelSeparation: 120,
+           levelSeparation: 100,
            blockShifting: false,
            edgeMinimization: false,
            parentCentralization: false
@@ -495,7 +496,7 @@ document.querySelector('#legend-btn').addEventListener('click', function(){
 
     legend.fit();
     setTimeout(function(){
-      legend.moveTo({scale: legend.getScale()*0.75, animation : {duration : 300}});
+      legend.moveTo({scale: legend.getScale()*0.85, animation : {duration : 300}});
     }, 50);
   }
 });
