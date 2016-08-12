@@ -1,6 +1,7 @@
 from itertools import groupby
-
 import math
+import re
+
 import pyalpm
 import pycman
 
@@ -15,6 +16,7 @@ class DbInfo:
         self.all_pkgs = {}
         self.groups = {}
         self.repos = {}
+        self.vdeps = {}
         self.repo_list = [x.name for x in self.syncdbs]
         self.repo_list.append(self.localdb.name)
         self.repos[self.localdb.name] = RepoInfo(self.localdb.name, self)
@@ -37,10 +39,13 @@ class DbInfo:
         return self.all_pkgs[pkgname]
 
     def resolve_dependency(self, dep):
-        pkg = self.localdb.get_pkg(dep)
+        pkgname = self.requirement2pkgname(dep)
+        if dep in self.all_pkgs:
+            return dep
+        pkg = pyalpm.find_satisfier(self.packages, dep)
         if pkg is None:
-            pkg = pyalpm.find_satisfier(self.packages, dep)
-        return pkg
+            return None
+        return pkg.name
 
     def find_all(self):
         for pkg in self.packages:
@@ -214,16 +219,28 @@ class DbInfo:
         maxCsSize = max(self.calcCsSize(pkg) for pkg in self.all_pkgs.values())
         append_message(" max csSize: " + str(maxCsSize))
 
+    def requirement2pkgname(self, requirement):
+        if any(x in requirement for x in "<=>"):
+            return re.split("[<=>]", requirement)[0]
+        return requirement
+
+    def find_vdep(self, provide, pkg):
+        name = self.requirement2pkgname(provide)
+        if name not in self.vdeps:
+            VDepInfo(name, self)
+        self.vdeps[name].deps.append(pkg)
+        self.all_pkgs[pkg].requiredby.append(name)
+        return name
 
 class PkgInfo:
 
     def __init__(self, name, dbinfo):
         self.name = name
         self.pkg = dbinfo.localdb.get_pkg(name)
+        dbinfo.all_pkgs[name] = self
         self.deps = []
         self.requiredby = []
         self.optdeps = []
-        self.provides = self.pkg.provides
         self.level = 1
         self.circledeps = []
         self.explicit = self.pkg.reason == 0
@@ -231,8 +248,9 @@ class PkgInfo:
         self.desc = self.pkg.desc
         self.version = self.pkg.version
         self.repo = dbinfo.find_syncdb(self.name)
-        dbinfo.all_pkgs[name] = self
         self.groups = self.pkg.groups
+        self.provides = [dbinfo.find_vdep(pro, self.name)
+            for pro in self.pkg.provides]
         for grp in self.groups:
             if grp in dbinfo.groups:
                 dbinfo.groups[grp].add_pkg(self.name)
@@ -242,13 +260,16 @@ class PkgInfo:
 
     def find_dependencies(self, dbinfo):
         for dep in self.pkg.depends:
-            self.deps.append(dbinfo.resolve_dependency(dep).name)
+            dependency = dbinfo.resolve_dependency(dep)
+            if dependency in dbinfo.all_pkgs:
+                self.deps.append(dependency)
+                dbinfo.get(dependency).requiredby.append(self.name)
         for dep in self.pkg.optdepends:
             depname = dep.split(":")[0]
             resolved = dbinfo.resolve_dependency(depname)
             if resolved is not None:
-                self.optdeps.append(resolved.name)
-        self.requiredby.extend(self.pkg.compute_requiredby())
+                self.optdeps.append(resolved)
+        # self.requiredby.extend(self.pkg.compute_requiredby())
 
 
 class GroupInfo (PkgInfo):
@@ -273,14 +294,50 @@ class GroupInfo (PkgInfo):
     def add_pkg(self, pkgname):
         self.deps.append(pkgname)
         self.dbinfo.get(pkgname).requiredby.append(self.name)
-        # reset group's repo
-        if self.repo and self.name in self.dbinfo.repos[self.repo].pkgs:
-            self.dbinfo.repos[self.repo].pkgs.remove(self.name)
-        self.repo = self.dbinfo.get(pkgname).repo
-        self.dbinfo.repos[self.repo].pkgs.add(self.name)
+
+    def reset_repo(self):
+        for repo in self.dbinfo.repo_list:
+            for pkg in self.deps:
+                if self.dbinfo.get(pkg).repo == repo:
+                    self.repo = repo
+                    self.dbinfo.repos[self.repo].pkgs.add(self.name)
+                    return
 
     def find_dependencies(self, dbinfo):
-        pass
+        self.reset_repo()
+
+
+class VDepInfo (PkgInfo):
+    def __init__(self, name, dbinfo):
+        self.name = name
+        self.deps = []
+        self.requiredby = []
+        self.optdeps = []
+        self.provides = []
+        self.level = 1
+        self.circledeps = []
+        self.groups = []
+        self.explicit = True
+        self.isize = 0
+        self.desc = name + " virtual dependency"
+        self.version = ""
+        self.repo = None
+        self.dbinfo = dbinfo
+        self.dbinfo.all_pkgs[name] = self
+        self.dbinfo.vdeps[name] = self
+
+    def reset_repo(self):
+        for repo in self.dbinfo.repo_list:
+            for pkg in self.deps:
+                if self.dbinfo.get(pkg).repo == repo:
+                    self.repo = repo
+                    self.dbinfo.repos[self.repo].pkgs.add(self.name)
+                    return
+
+    def find_dependencies(self, dbinfo):
+        self.reset_repo()
+        for dep in self.deps:
+            dbinfo.get(dep).requiredby.append(self.name)
 
 
 class RepoInfo:

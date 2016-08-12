@@ -126,6 +126,15 @@
             </label>
           </div>
           <div class="mdl-card__title mdl-card--expand">
+            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="showallvdeps">
+              <input type="checkbox" id="showallvdeps" name="showallvdeps"
+                class="mdl-switch__input"
+                value="True"
+                {% if options.showallvdeps %} checked {% end %} >
+              <span class="mdl-checkbox__label" style="margin-left: 20px">Show all virtual dependencies</span>
+            </label>
+          </div>
+          <div class="mdl-card__title mdl-card--expand">
             <div class="mdl-layout-spacer"></div>
             <button type="submit" value="Reload" title="Reload the graph" id="reloadbtn"
                     class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
@@ -272,6 +281,7 @@ var options = {
     standalone: { shape: 'square', color: 'rgba(100,100,255,0.8)', size: 12 },
     normal: { shape: 'dot', color: 'rgba(255,171,64,0.8)'},
     group: { shape: 'triangle', size: 12, color: 'rgba(76,175,80,0.8)'},
+    vdep: { shape: 'diamond', size: 12, color: 'rgba(205,220,57,0.8)'},
     explicit: { shape: 'dot', color: 'rgba(103,58,183,0.8)'},
     consolidated: { shape: 'star', color: 'rgba(255,0,0,0.8)', size: 12},
   },

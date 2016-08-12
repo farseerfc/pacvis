@@ -7,7 +7,7 @@ import tornado.ioloop
 import tornado.web
 
 from .console import start_message, append_message, print_message
-from .infos import DbInfo, PkgInfo, GroupInfo
+from .infos import DbInfo, PkgInfo, GroupInfo, VDepInfo
 
 
 # Tornado entry
@@ -35,7 +35,8 @@ class MainHandler(tornado.web.RequestHandler):
             aligntop=False,
             disableallphysics=False,
             debugperformance=False,
-            mergerepos=False))
+            mergerepos=False,
+            showallvdeps=False))
         dbinfo = DbInfo()
         start_message("Loading local database ...")
         dbinfo.find_all()
@@ -79,6 +80,10 @@ class MainHandler(tornado.web.RequestHandler):
                     group = "standalone"
                 elif type(pkg) is GroupInfo:
                     group = "group"
+                elif type(pkg) is VDepInfo:
+                    group = "vdep"
+                    if args.showallvdeps and len(pkg.requiredby)==0:
+                      continue
                 elif pkg.explicit:
                     group = "explicit"
                 nodes.append({"id": pkg.id,
@@ -117,7 +122,7 @@ class MainHandler(tornado.web.RequestHandler):
                         links.append({"id": ids,
                                       "to": pkg.id,
                                       "from": dbinfo.get(dep).id,
-                                      "color": "rgb(255,0,0)"})
+                                      "color": "rgb(244,67,54,0.8)"})
                         ids += 1
                 for dep in pkg.optdeps:
                     if dep in dbinfo.all_pkgs:
@@ -125,7 +130,7 @@ class MainHandler(tornado.web.RequestHandler):
                                       "from": pkg.id,
                                       "to": dbinfo.get(dep).id,
                                       "dashes": True,
-                                      "color": "rgb(255,255,100)"})
+                                      "color": "rgb(255,235,59)"})
                         ids += 1
         print_message("Writing HTML")
         self.render("templates/index.template.html",
