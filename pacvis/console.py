@@ -9,6 +9,7 @@ head_message = u""
 output_log, time_format = "/dev/null", "%Y-%m-%d %H:%M:%S"
 last_line_ended = True
 
+
 def log_file():
     return open(output_log, "a")
 
@@ -47,5 +48,3 @@ def print_message(s):
         log.write("%s: %s\n" % (strftime(time_format, gmtime()), s))
         log.flush()
     last_line_ended = True
-
-

@@ -7,6 +7,7 @@ import pycman
 
 from .console import start_message, append_message, print_message
 
+
 class DbInfo:
     def __init__(self):
         self.handle = pycman.config.init_with_config("/etc/pacman.conf")
@@ -18,13 +19,15 @@ class DbInfo:
         self.repos = {}
         self.vdeps = {}
         self.repo_list = [x.name for x in self.syncdbs]
-        self.repo_list.append(self.localdb.name)
-        self.repos[self.localdb.name] = RepoInfo(self.localdb.name, self)
-        print_message("Enabled repos: %s" % ", ".join(db.name for db in self.syncdbs))
+        local = self.localdb.name
+        self.repo_list.append(local)
+        self.repos[local] = RepoInfo(local, self)
+        print_message("Enabled repos: %s" %
+                      ", ".join(db.name for db in self.syncdbs))
         print_message("Repo_list repos: %s" % ", ".join(self.repo_list))
 
     def find_syncdb(self, pkgname):
-        repos = dict((db.name,db) for db in self.syncdbs)
+        repos = dict((db.name, db) for db in self.syncdbs)
         found, pkg = pycman.action_sync.find_sync_package(pkgname, repos)
         if found:
             repo = pkg.db.name
@@ -91,48 +94,56 @@ class DbInfo:
         start_message("Top-down sorting ")
         while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
-            origin_level = self.get(pkg).level
+            pkginfo = self.get(pkg)
+            origin_level = pkginfo.level
             append_message("%s %d (remaining %d)" % (pkg,
                                                      origin_level,
                                                      len(remain_pkgs)))
-            if len(all_pkgs.intersection(self.get(pkg).deps)) == 0:
-                if len(self.get(pkg).deps) == 0 and len(self.get(pkg).requiredby) == 0:
-                    self.get(pkg).level = 0
+            if len(all_pkgs.intersection(pkginfo.deps)) == 0:
+                if all([len(pkginfo.deps) == 0,
+                        len(pkginfo.requiredby) == 0]):
+                    pkginfo.level = 0
                 continue
-            max_level = max(self.get(x).level for x in all_pkgs.intersection(self.get(pkg).deps)) + 1
+            max_level = 1 + max(self.get(x).level
+                                for x in all_pkgs.intersection(pkginfo.deps))
             if usemagic:
                 # below is magic
                 new_level = max_level + int(math.log(1 +
-                                                     len(self.get(pkg).deps) +
-                                                     len(self.get(pkg).requiredby)))
+                                                     len(pkginfo.deps) +
+                                                     len(pkginfo.requiredby)))
             else:
                 new_level = max_level  # we may not need magic at all
             if new_level != origin_level:
-                self.get(pkg).level = new_level
-                remain_pkgs.update(all_pkgs.intersection(set(self.get(pkg).requiredby)
-                                   .difference(self.get(pkg).circledeps)))
+                pkginfo.level = new_level
+                remain_pkgs.update(
+                    all_pkgs.intersection(
+                        set(pkginfo.requiredby).difference(
+                            pkginfo.circledeps)))
 
     def buttom_up_sort(self, all_pkgs):
         remain_pkgs = set(all_pkgs)
         start_message("Buttom-up sorting ")
         while len(remain_pkgs) > 0:
             pkg = remain_pkgs.pop()
-            origin_level = self.get(pkg).level
+            pkginfo = self.get(pkg)
+            origin_level = pkginfo.level
             append_message("%s %d (remaining %d)" % (pkg,
                                                      origin_level,
                                                      len(remain_pkgs)))
-            if len(all_pkgs.intersection(self.get(pkg).requiredby)) == 0:
+            if len(all_pkgs.intersection(pkginfo.requiredby)) == 0:
                 continue
-            min_level = min(self.get(x).level for x in all_pkgs.intersection(self.get(pkg).requiredby))
+            min_level = min(self.get(x).level
+                            for x in all_pkgs.intersection(pkginfo.requiredby))
             new_level = min_level - 1
             if new_level > origin_level:
-                self.get(pkg).level = new_level
-                remain_pkgs.update(all_pkgs.intersection(set(self.get(pkg).deps)
-                                   .difference(self.get(pkg).circledeps)))
+                pkginfo.level = new_level
+                remain_pkgs.update(all_pkgs.intersection(set(pkginfo.deps)
+                                   .difference(pkginfo.circledeps)))
 
     def minimize_levels(self, all_pkgs, nextlevel):
         start_message("Minimizing levels ... ")
-        pkgs = list(sorted((self.get(pkg) for pkg in all_pkgs), key=lambda x: x.level))
+        pkgs = list(sorted((self.get(pkg) for pkg in all_pkgs),
+                           key=lambda x: x.level))
         for key, group in groupby(pkgs, key=lambda x: x.level):
             for pkg in group:
                 pkg.level = nextlevel
@@ -146,30 +157,30 @@ class DbInfo:
             result[repo] = self.repos[repo].average_level()
         return result
 
-
     def topology_sort(self, usemagic, aligntop, mergerepos):
         if mergerepos:
             all_pkgs = {x for x in self.all_pkgs}
             self.top_down_sort(usemagic, all_pkgs)
             self.buttom_up_sort(all_pkgs)
             if aligntop:
-                self.top_down_sort(usemagic, all_pkgs) # do top_down_sort again to align to top
+                # do top_down_sort again to align to top
+                self.top_down_sort(usemagic, all_pkgs)
             self.minimize_levels(all_pkgs, 1)
         else:
             nextlevel = 1
             for repo in self.repo_list:
-                if repo not in self.repos: continue
+                if repo not in self.repos:
+                    continue
                 print_message("Repo %s" % repo)
                 all_pkgs = self.repos[repo].pkgs
                 for pkg in all_pkgs:
-                    self.get(pkg).level = nextlevel # assign initial level
-                self.top_down_sort(usemagic, all_pkgs) 
+                    self.get(pkg).level = nextlevel  # assign initial level
+                self.top_down_sort(usemagic, all_pkgs)
                 self.buttom_up_sort(all_pkgs)
                 if aligntop:
-                    self.top_down_sort(usemagic, all_pkgs) # do top_down_sort again to align to top
+                    # do top_down_sort again to align to top
+                    self.top_down_sort(usemagic, all_pkgs)
                 nextlevel = self.minimize_levels(all_pkgs, nextlevel)
-        
-
 
     def calcCSize(self, pkg):
         removing_pkg = set()
@@ -232,8 +243,8 @@ class DbInfo:
         self.all_pkgs[pkg].requiredby.append(name)
         return name
 
-class PkgInfo:
 
+class PkgInfo:
     def __init__(self, name, dbinfo):
         self.name = name
         self.pkg = dbinfo.localdb.get_pkg(name)
@@ -250,7 +261,7 @@ class PkgInfo:
         self.repo = dbinfo.find_syncdb(self.name)
         self.groups = self.pkg.groups
         self.provides = [dbinfo.find_vdep(pro, self.name)
-            for pro in self.pkg.provides]
+                         for pro in self.pkg.provides]
         for grp in self.groups:
             if grp in dbinfo.groups:
                 dbinfo.groups[grp].add_pkg(self.name)

@@ -16,17 +16,18 @@ class MainHandler(tornado.web.RequestHandler):
     def parse_args(self, **kargs):
         result = {}
         for key in kargs:
+            defvalue = str(kargs[key])
             if type(kargs[key]) is int:
-                result[key] = int(self.get_argument(key, str(kargs[key])))
+                result[key] = int(self.get_argument(key, defvalue))
             elif type(kargs[key]) is bool:
-                result[key] = (self.get_argument(key, str(kargs[key])) != "False")
+                result[key] = self.get_argument(key, defvalue) != "False"
             else:
-                result[key] = self.get_argument(key, str(kargs[key]))
-            print_message("get arg %r: %r" %(key, result[key]))
+                result[key] = self.get_argument(key, defvalue)
+            print_message("get arg %r: %r" % (key, result[key]))
         return result
 
     def get(self):
-        print_message("\n"+ str(self.request))
+        print_message("\n" + str(self.request))
         args = SimpleNamespace(**self.parse_args(
             maxlevel=1000,
             maxreqs=1000,
@@ -82,8 +83,8 @@ class MainHandler(tornado.web.RequestHandler):
                     group = "group"
                 elif type(pkg) is VDepInfo:
                     group = "vdep"
-                    if args.showallvdeps and len(pkg.requiredby)==0:
-                      continue
+                    if not args.showallvdeps and len(pkg.requiredby) == 0:
+                        continue
                 elif pkg.explicit:
                     group = "explicit"
                 nodes.append({"id": pkg.id,
@@ -147,11 +148,13 @@ def make_app():
         ], debug=True,
         static_path=os.path.join(os.path.dirname(__file__), "static"))
 
+
 def main():
     app = make_app()
     app.listen(8888)
     print_message("Start PacVis at http://localhost:8888/")
     tornado.ioloop.IOLoop.current().start()
+
 
 if __name__ == "__main__":
     main()
