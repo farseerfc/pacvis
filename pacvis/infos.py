@@ -27,11 +27,14 @@ class DbInfo:
         print_message("Repo_list repos: %s" % ", ".join(self.repo_list))
 
     def find_syncdb(self, pkgname):
-        repos = dict((db.name, db) for db in self.syncdbs)
-        found, pkg = pycman.action_sync.find_sync_package(pkgname, repos)
-        if found:
-            repo = pkg.db.name
-        else:
+        repo = ""
+        found = False
+        for db in self.syncdbs:
+            if db.get_pkg(pkgname) is not None:
+                found = True
+                repo = db.name
+                break
+        if not found:
             repo = self.localdb.name
         if repo not in self.repos:
             self.repos[repo] = RepoInfo(repo, self)

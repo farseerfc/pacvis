@@ -292,13 +292,13 @@ var physics = {
   maxVelocity: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*200),
   hierarchicalRepulsion: {
     nodeDistance: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*180),
-    springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*10),
+    springLength: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
     springConstant: 1,
     damping: 0.1
   },
   timestep: 0.1,
   stabilization: {
-    iterations: 300*Math.log(nodes.length),
+    iterations: 200*Math.log(nodes.length),
     updateInterval: Math.log(nodes.length),
   }
 };
@@ -337,8 +337,8 @@ var options = {
   layout: {
      hierarchical: {
          direction: "UD",
-         nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*180),
-         treeSpacing: 50,
+         nodeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*100),
+         treeSpacing: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*180),
          levelSeparation: Math.floor(Math.sqrt(Math.sqrt(nodes.length))*50),
          blockShifting: false,
          edgeMinimization: false,
