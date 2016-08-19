@@ -67,7 +67,8 @@ class DbInfo:
                     for dep in pkg.deps:
                         while pkg.name in self.get(dep).requiredby:
                             self.get(dep).requiredby.remove(pkg.name)
-                    self.repos[pkg.repo].pkgs.remove(pkg.name)
+                    while pkg.repo in self.repos and pkg.name in self.repos[pkg.repo].pkgs:
+                        self.repos[pkg.repo].pkgs.remove(pkg.name)
                     del self.all_pkgs[pkg.name]
                     del self.vdeps[pkg.name]
         return self.all_pkgs
@@ -252,6 +253,8 @@ class DbInfo:
 
     def find_vdep(self, provide, pkg):
         name = self.requirement2pkgname(provide)
+        if name in self.all_pkgs:
+            return name
         if name not in self.vdeps:
             VDepInfo(name, self)
         self.vdeps[name].deps.append(pkg)
