@@ -313,8 +313,8 @@ var physics = {
   },
   timestep: 0.1,
   stabilization: {
-    iterations: 50*Math.log(nodes.length),
-    updateInterval: 0.5*Math.log(nodes.length),
+    iterations: 30*Math.sqrt(nodes.length),
+    updateInterval: 0.3*Math.sqrt(nodes.length),
   }
 };
 var options = {
