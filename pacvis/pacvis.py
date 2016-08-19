@@ -31,7 +31,9 @@ class MainHandler(tornado.web.RequestHandler):
         args = SimpleNamespace(**self.parse_args(
             maxlevel=1000,
             maxreqs=1000,
+            maxdeps=1000,
             usemagic=False,
+            straightline=False,
             enablephysics=False,
             aligntop=False,
             disableallphysics=False,
@@ -111,13 +113,14 @@ class MainHandler(tornado.web.RequestHandler):
                                   "from": pkg.id,
                                   "to": 0})
                     ids += 1
-                for dep in pkg.deps:
-                    if dep not in pkg.circledeps:
-                        if len(dbinfo.get(dep).requiredby) < args.maxreqs:
-                            links.append({"id": ids,
-                                          "from": pkg.id,
-                                          "to": dbinfo.get(dep).id})
-                            ids += 1
+                if len(pkg.deps) < args.maxdeps:
+                    for dep in pkg.deps:
+                        if dep not in pkg.circledeps:
+                            if len(dbinfo.get(dep).requiredby) < args.maxreqs:
+                                links.append({"id": ids,
+                                              "from": pkg.id,
+                                              "to": dbinfo.get(dep).id})
+                                ids += 1
                 for dep in pkg.circledeps:
                     if (pkg.id != dbinfo.get(dep).id):
                         links.append({"id": ids,

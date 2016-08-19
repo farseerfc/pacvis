@@ -324,11 +324,15 @@ var options = {
     }
   },
   edges: {
+    {% if options.straightline %}
+    smooth: false,
+    {% else %}
      smooth: {
          type: 'cubicBezier',
          forceDirection: "vertical",
          roundness: 0.5
      },
+    {% end %}
      selectionWidth: 8,
      arrows: {
          to : true
