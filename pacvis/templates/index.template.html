@@ -95,6 +95,12 @@
               <label class="mdl-textfield__label" for="maxlevel">Max Level: </label>
             </div>
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="number" id="maxdeps"
+                      title="Limiting max required-by lines to show a clearer image"
+                      name="maxdeps" value="{{options.maxdeps}}" />
+              <label class="mdl-textfield__label" for="maxdeps">Max Depends: </label>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
               <input class="mdl-textfield__input" type="number" id="maxreqs"
                       title="Limiting max required-by lines to show a clearer image"
                       name="maxreqs" value="{{options.maxreqs}}" />
@@ -144,6 +150,15 @@
                 value="True"
                 {% if options.showallvdeps %} checked {% end %} >
               <span class="mdl-checkbox__label" style="margin-left: 20px">Show all virtual dependencies</span>
+            </label>
+          </div>
+          <div class="mdl-card__title mdl-card--expand">
+            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="straightline">
+              <input type="checkbox" id="straightline" name="straightline"
+                class="mdl-switch__input"
+                value="True"
+                {% if options.showallvdeps %} checked {% end %} >
+              <span class="mdl-checkbox__label" style="margin-left: 20px">Use straight lines as edges</span>
             </label>
           </div>
           <div class="mdl-card__title mdl-card--expand">
