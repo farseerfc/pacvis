@@ -2,6 +2,7 @@
 
 import json
 from types import SimpleNamespace
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 import tornado.ioloop
 import tornado.web
@@ -153,9 +154,21 @@ def make_app():
 
 
 def main():
+    argp = ArgumentParser(description='start PacVis server', formatter_class=ArgumentDefaultsHelpFormatter)
+    argp.add_argument('-p', '--port', type=int, default=8888, help='listen at given port')
+    argp.add_argument('-s', '--host', type=str, default='localhost', help='listen at given hostname')
+    argp.add_argument('-b', '--browser', action='store_true', help='start a browser')
+    args = argp.parse_args()
     app = make_app()
-    app.listen(8888)
-    print_message("Start PacVis at http://localhost:8888/")
+    app.listen(args.port, address=args.host)
+    print_message(f"Start PacVis at http://{args.host}:{args.port}/")
+    if args.browser:
+        import os
+        cmd = f'xdg-open "http://{args.host}:{args.port}/"'
+        print_message(f'running: {cmd}')
+        os.system(f'xdg-open "http://{args.host}:{args.port}/"')
+    else:
+        print_message('use --browser to open a browser automatically.')
     tornado.ioloop.IOLoop.current().start()
 
 
