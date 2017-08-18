@@ -1,0 +1,16 @@
+[Unit]
+Description=PacVis pacman local database visualizer
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/pacvis -p %i
+
+# Limit memory at 400M to workaround pyalpm potential memory leak
+LimitAS=400M
+
+# Restart every >2 seconds to avoid StartLimitInterval failure
+RestartSec=2
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
