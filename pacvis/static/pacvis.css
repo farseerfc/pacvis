@@ -134,7 +134,12 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
+.mdl-textfield--expandable .mdl-button--icon {
+    top: 4px;
+}
+#searchwrapper {
+  padding: 0;
+}
 #fsinfo {
   transform-origin: 50% 0%;
   animation-duration: .3s;
