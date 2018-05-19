@@ -173,8 +173,8 @@ class DbInfo:
             result[repo] = self.repos[repo].average_level()
         return result
 
-    def topology_sort(self, usemagic, aligntop, mergerepos):
-        if mergerepos:
+    def topology_sort(self, usemagic, aligntop, byrepos):
+        if not byrepos:
             all_pkgs = {x for x in self.all_pkgs}
             self.top_down_sort(usemagic, all_pkgs)
             self.buttom_up_sort(all_pkgs)

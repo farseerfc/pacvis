@@ -39,7 +39,7 @@ class MainHandler(tornado.web.RequestHandler):
             aligntop=False,
             disableallphysics=False,
             debugperformance=False,
-            mergerepos=False,
+            byrepos=False,
             showallvdeps=False))
         dbinfo = DbInfo()
         start_message("Loading local database ...")
@@ -48,7 +48,7 @@ class MainHandler(tornado.web.RequestHandler):
         start_message("Finding all dependency circles ... ")
         dbinfo.find_circles()
         append_message("done")
-        dbinfo.topology_sort(args.usemagic, args.aligntop, args.mergerepos)
+        dbinfo.topology_sort(args.usemagic, args.aligntop, args.byrepos)
         dbinfo.calcSizes()
 
         start_message("Rendering ... ")
