@@ -35,9 +35,14 @@
           <div class="mdl-textfield__expandable-holder">
             <input class="mdl-textfield__input" type="text" id="search" placeholder="search pkgname" />
           </div>
+
         </div>
+        <a title="GitHub repo" href="https://github.com/farseerfc/pacvis"
+          class="mdl-button mdl-js-button mdl-button--icon">
+          <i class="material-icons">home</i>
+        </a>
       </div>
-      <div class="mdl-card__title mdl-card--expand"
+      <!-- <div class="mdl-card__title mdl-card--expand"
              style="background-color: rgb(103,58,183); color: #fff; padding: 0 16px 16px 16px;">
         <div>
           Visualize pacman local database using
@@ -48,7 +53,7 @@
           class="mdl-button mdl-js-button mdl-button--icon">
           <i class="material-icons">home</i>
         </a>
-      </div>
+      </div> -->
       <div id="loading_progress" class="mdl-progress mdl-js-progress" style="width:100%"></div>
       <div class="mdl-card__title mdl-card--expand"
            style="color: rgb(103,58,183); padding: 16px 16px 8px 16px;">
@@ -57,22 +62,10 @@
           <i class="material-icons">help_outline</i>
         </button>
         <div class="mdl-layout-spacer"></div>
-        <div id="currentsizedesc">Install Size (-R)</div>
-        <button id="selectsize-menu" title="Select shown size"
-          class="mdl-button mdl-js-button mdl-button--icon">
-          <i class="material-icons">arrow_drop_down</i>
-        </button>
-        <ul class="mdl-menu mdl-menu--top-right mdl-js-menu mdl-js-ripple-effect"
-            data-mdl-for="selectsize-menu">
-          <li id="isize" class="mdl-menu__item">Install Size (-R)</li>
-          <li id="csize" class="mdl-menu__item">Cascade Size (-Rc)</li>
-          <li id="cssize" class="mdl-menu__item">Recursive Size (-Rcs)</li>
-        </ul>
-        <div class="mdl-layout-spacer"></div>
         <div>Options&nbsp;&nbsp;</div>
         <button id="advanced_menu" title="Show Advanced options"
           class="mdl-button mdl-js-button mdl-button--icon">
-          <i class="material-icons">menu</i>
+          <i class="material-icons">settings</i>
         </button>
       </div>
       <div class="mdl-card__title mdl-card--expand" id="legend_panel"
@@ -107,58 +100,65 @@
               <label class="mdl-textfield__label" for="maxreqs">Max Required-By: </label>
             </div>
           </div>
-          <div class="mdl-card__title mdl-card--expand">
+          <div class="mdl-card__supporting-text mdl-card--expand">
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-isize">
+              <input type="radio" id="option-isize" class="mdl-radio__button" name="drawsize" value="isize"
+                {% if options.drawsize == "isize" %} checked {% end %}>
+              <span class="mdl-radio__label">Draw Installed Size (-R)</span>
+            </label>
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-csize">
+              <input type="radio" id="option-csize" class="mdl-radio__button" name="drawsize" value="csize"
+                {% if options.drawsize == "csize" %} checked {% end %}>
+              <span class="mdl-radio__label">Draw Cascade Size (-Rc)</span>
+            </label>
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-cssize">
+              <input type="radio" id="option-cssize" class="mdl-radio__button" name="drawsize" value="cssize"
+                {% if options.drawsize == "cssize" %} checked {% end %}>
+              <span class="mdl-radio__label">Draw Recursive Size (-Rcs)</span>
+            </label>
+          </div>
+          <div class="mdl-card__supporting-text mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="usemagic">
               <input type="checkbox" id="usemagic" name="usemagic"
                 class="mdl-switch__input"
                 value="True"
                 {% if options.usemagic %} checked {% end %} >
-              <span class="mdl-checkbox__label" style="margin-left: 20px">Randomize topology level</span>
+              <span class="mdl-switch__label">Randomize topology level</span>
             </label>
-          </div>
-          <div class="mdl-card__title mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="byrepos">
               <input type="checkbox" id="byrepos" name="byrepos"
                 class="mdl-switch__input"
                 value="True"
                 {% if options.byrepos %} checked {% end %} >
-              <span class="mdl-checkbox__label" style="margin-left: 20px">Layered by repositories</span>
+              <span class="mdl-switch__label">Layered by repositories</span>
             </label>
-          </div>
-          <div class="mdl-card__title mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="enablephysics">
               <input type="checkbox" id="enablephysics" name="enablephysics"
                 class="mdl-switch__input"
                 value="True"
                 {% if options.enablephysics %} checked {% end %} >
-              <span class="mdl-checkbox__label" style="margin-left: 20px">Enable physics after stabilized</span>
+              <span class="mdl-switch__label">Enable physics after stabilized</span>
             </label>
-          </div>
-          <div class="mdl-card__title mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="aligntop">
               <input type="checkbox" id="aligntop" name="aligntop"
                 class="mdl-switch__input"
                 value="True"
                 {% if options.aligntop %} checked {% end %} >
-              <span class="mdl-checkbox__label" style="margin-left: 20px">Align packages to as high as possible</span>
+              <span class="mdl-switch__label">Align packages to top</span>
             </label>
-          </div>
-          <div class="mdl-card__title mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="showallvdeps">
               <input type="checkbox" id="showallvdeps" name="showallvdeps"
                 class="mdl-switch__input"
                 value="True"
                 {% if options.showallvdeps %} checked {% end %} >
-              <span class="mdl-checkbox__label" style="margin-left: 20px">Show all virtual dependencies</span>
+              <span class="mdl-switch__label">Show all virtual dependencies</span>
             </label>
-          </div>
-          <div class="mdl-card__title mdl-card--expand">
             <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="straightline">
               <input type="checkbox" id="straightline" name="straightline"
                 class="mdl-switch__input"
                 value="True"
                 {% if options.showallvdeps %} checked {% end %} >
-              <span class="mdl-checkbox__label" style="margin-left: 20px">Use straight lines as edges</span>
+              <span class="mdl-switch__label">Use straight lines as edges</span>
             </label>
           </div>
           <div class="mdl-card__title mdl-card--expand">
@@ -263,7 +263,7 @@
 
 <script type="text/javascript">
 
-var currentsize="isize";
+var currentsize="{{ options.drawsize }}";
 
 var nodedata = {% raw nodes %};
 
@@ -285,7 +285,7 @@ function wrapDeps(list){
 for(let nodeid in nodedata){
   let node = nodedata[nodeid];
   node.title = "<h4>" + node.label + "</h4>" +
-    "<p>installed size: " + filesize(node[currentsize]) + "</p>" +
+    "<p>size: " + filesize(node[currentsize]) + "</p>" +
     "<p>groups: [" + wrapDeps(node.groups) + "]</p>" +
     "<p>depends: [" + wrapDeps(node.deps) + "]</p>" +
     "<p>required by:[" + wrapDeps(node.reqs) +"]</p>" +
@@ -420,6 +420,7 @@ function pacvis(){
 
 
 var pacvisopts = {% raw optionsjson %};
+
 function ifNeedReload(){
   let need = false;
   for(key in pacvisopts){
@@ -429,6 +430,7 @@ function ifNeedReload(){
       let cv = Number.isInteger(v) ? dom.value : dom.checked;
       need = need || cv != v;
     }
+    need = need || !document.querySelector("#option-"+currentsize).checked;
   }
   if(need){
     document.querySelector('#reloadbtn').className = "mdl-button mdl-js-button mdl-button--raised mdl-button--colored";
@@ -439,10 +441,16 @@ function ifNeedReload(){
 for(key in pacvisopts){
   let dom = document.querySelector("#"+key);
   if(dom) {
-    dom.addEventListener(Number.isInteger(pacvisopts[key]) ? "input" : "change" , ifNeedReload);
+    if(Number.isInteger(pacvisopts[key])){
+      dom.addEventListener("input", ifNeedReload);
+    }else{
+      dom.addEventListener("change" , ifNeedReload);
+    }
   }
 }
-
+document.querySelector("#option-isize").addEventListener("change" , ifNeedReload);
+document.querySelector("#option-csize").addEventListener("change" , ifNeedReload);
+document.querySelector("#option-cssize").addEventListener("change" , ifNeedReload);
 
 document.querySelector('#search').addEventListener('input', trysearch);
 document.querySelector('#close_button').addEventListener('click', close_panel);
@@ -527,21 +535,6 @@ document.querySelector('#enablephysics').addEventListener('change', function(){
   }
 });
 document.querySelector('#loading_progress').addEventListener('mdl-componentupgraded', pacvis);
-document.querySelector('#isize').addEventListener('click', function(){
-  currentsize = "isize";
-  document.querySelector('#currentsizedesc').innerText = this.innerText;
-  switchsizeto("isize");
-});
-document.querySelector('#csize').addEventListener('click', function(){
-  currentsize = "csize";
-  document.querySelector('#currentsizedesc').innerText = this.innerText;
-  switchsizeto("csize");
-});
-document.querySelector('#cssize').addEventListener('click', function(){
-  currentsize = "cssize";
-  document.querySelector('#currentsizedesc').innerText = this.innerText;
-  switchsizeto("cssize");
-});
 
 document.querySelector('#zoomin').addEventListener('click', function(){
   network.moveTo({'scale': network.getScale()*2, animation : {duration : 300}});

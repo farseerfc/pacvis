@@ -128,6 +128,13 @@
   padding: 0 8px;
   text-transform: none;
 }
+.mdl-checkbox__label{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 #fsinfo {
   transform-origin: 50% 0%;
   animation-duration: .3s;

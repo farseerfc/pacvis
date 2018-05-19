@@ -113,7 +113,7 @@ function selectPkg(node) {
   document.getElementById("fsinfo").style.display = "block";
   document.querySelector('#fsinfo').className = "mdl-card mdl-shadow--4dp animated zoomIn";
   document.getElementById("pkgname").innerHTML = node.label;
-  document.getElementById("pkgsizedesc").innerHTML = document.querySelector('#currentsizedesc').innerHTML;
+  document.getElementById("pkgsizedesc").innerHTML = {"isize":"Installed", "csize":"Cascade", "cssize":"Recursive"}[currentsize] + " Size";
   document.getElementById("pkgsize").innerHTML =  filesize(node[currentsize]);
   let reason = node.group == "normal" ? "as a dependency" : "explicitly";
   document.getElementById("pkgreason").innerHTML = reason;
@@ -184,16 +184,6 @@ function trysearch() {
   }
 }
 
-
-function switchsizeto(size){
-  let pkgname = document.getElementById("pkgname").innerHTML;
-  for (let node of nodes.get()) {
-    nodes.update({id : node.id, value : size2value(node[size])});
-    if (node.label == pkgname) {
-      selectPkg(node);
-    }
-  }
-}
 
 function close_panel() {
   document.querySelector('#lefttoppanel').className = "lefttoppanel animated zoomOut";

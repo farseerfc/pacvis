@@ -33,6 +33,7 @@ class MainHandler(tornado.web.RequestHandler):
             maxlevel=1000,
             maxreqs=1000,
             maxdeps=1000,
+            drawsize="isize",
             usemagic=False,
             straightline=False,
             enablephysics=False,
