@@ -199,3 +199,132 @@ function show_panel() {
   document.querySelector('#lefttoppanel').className = "lefttoppanel animated zoomIn";
   document.querySelector('#leftpanel_show').className = "leftpanel-show mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect animated zoomOut";
 }
+
+function pacvisDom() {
+  function ifNeedReload(){
+    let need = false;
+    for(key in pacvisopts){
+      let v = pacvisopts[key];
+      let dom = document.querySelector("#"+key);
+      if(dom){
+        let cv = Number.isInteger(v) ? dom.value : dom.checked;
+        need = need || cv != v;
+      }
+      need = need || !document.querySelector("#option-"+currentsize).checked;
+    }
+    if(need){
+      document.querySelector('#reloadbtn').className = "mdl-button mdl-js-button mdl-button--raised mdl-button--colored";
+    }else{
+      document.querySelector('#reloadbtn').className = "mdl-button mdl-js-button mdl-button--primary";
+    }
+  }
+  for(key in pacvisopts){
+    let dom = document.querySelector("#"+key);
+    if(dom) {
+      if(Number.isInteger(pacvisopts[key])){
+        dom.addEventListener("input", ifNeedReload);
+      }else{
+        dom.addEventListener("change" , ifNeedReload);
+      }
+    }
+  }
+  document.querySelector("#option-isize").addEventListener("change" , ifNeedReload);
+  document.querySelector("#option-csize").addEventListener("change" , ifNeedReload);
+  document.querySelector("#option-cssize").addEventListener("change" , ifNeedReload);
+
+  document.querySelector('#search').addEventListener('input', trysearch);
+  document.querySelector('#close_button').addEventListener('click', close_panel);
+  document.querySelector('#leftpanel_show').addEventListener('click', show_panel);
+  document.querySelector('#advanced_menu').addEventListener('click', function(){
+    if (document.querySelector('#advanced_form').style.display == "block"){
+      document.querySelector('#advanced_form').style.display = "none";
+    }else{
+      document.querySelector('#advanced_form').style.display = "block";
+      document.querySelector('#legend_panel').style.display = "none";
+    }
+  });
+  document.querySelector('#legend-btn').addEventListener('click', function(){
+    if (document.querySelector('#legend_panel').style.display == "block"){
+      document.querySelector('#legend_panel').style.display = "none";
+    }else{
+      document.querySelector('#legend_panel').style.display = "block";
+      document.querySelector('#advanced_form').style.display = "none";
+      let legend_options = JSON.parse(JSON.stringify(options)); // deep copy
+      legend_options.layout = {
+         hierarchical: {
+             direction: "UD",
+             nodeSpacing: 50,
+             treeSpacing: 50,
+             levelSeparation: 100,
+             blockShifting: false,
+             edgeMinimization: false,
+             parentCentralization: false
+         },
+        improvedLayout: true
+      };
+      legend_options.physics = false;
+      let legend = new vis.Network(document.querySelector("#legend_target"), {
+        nodes: [
+          {
+            id: "normal-legend",
+            label: "packages installed as dependencies",
+            level: 0,
+            group: "normal",
+            value: size2value(0),
+          },
+          {
+            id: "explicit-legend",
+            label: "packages installed explicitly",
+            level: 2,
+            group: "explicit",
+            value: size2value(0),
+          },
+          {
+            id: "group-legend",
+            label: "package groups",
+            level: 4,
+            group: "group",
+            value: size2value(0),
+          },
+          {
+            id: "vdep-legend",
+            label: "virtual dependencies (in provides)",
+            level: 6,
+            group: "vdep",
+            value: size2value(0),
+          },
+        ],
+        edges: [
+          { from: "normal-legend", to: "explicit-legend" },
+          { from: "explicit-legend", to: "group-legend" },
+          { from: "group-legend", to: "vdep-legend" },
+        ]
+      }, legend_options);
+
+      legend.fit();
+      setTimeout(function(){
+        legend.moveTo({scale: legend.getScale()*0.85, animation : {duration : 300}});
+      }, 50);
+    }
+  });
+  document.querySelector('#enablephysics').addEventListener('change', function(){
+    if(this.checked){
+      network.setOptions({physics: physics});
+    }else{
+      network.setOptions({physics: false});
+    }
+  });
+  document.querySelector('#loading_progress').addEventListener('mdl-componentupgraded', pacvis);
+
+  document.querySelector('#zoomin').addEventListener('click', function(){
+    network.moveTo({'scale': network.getScale()*2, animation : {duration : 300}});
+  });
+
+  document.querySelector('#zoomout').addEventListener('click', function(){
+    network.moveTo({'scale': network.getScale()*0.5, animation : {duration : 300}});
+  });
+
+  document.querySelector('#zoomfit').addEventListener('click', function(){
+    network.fit({animation : {duration : 300}});
+  });
+}

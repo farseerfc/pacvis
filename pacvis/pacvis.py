@@ -139,7 +139,7 @@ class MainHandler(tornado.web.RequestHandler):
                                       "color": "rgb(255,235,59)"})
                         ids += 1
         print_message("Writing HTML")
-        self.render("templates/index.template.html",
+        self.render("templates/index.vuemd.html",
                     nodes=json.dumps(nodes),
                     links=json.dumps(links),
                     options=args,
