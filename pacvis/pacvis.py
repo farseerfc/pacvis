@@ -3,6 +3,7 @@
 import json
 from types import SimpleNamespace
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from webbrowser import open_new_tab
 
 import tornado.ioloop
 import tornado.web
@@ -164,10 +165,9 @@ def main():
     app.listen(args.port, address=args.host)
     print_message(f"Start PacVis at http://{args.host}:{args.port}/")
     if args.browser:
-        import os
-        cmd = f'xdg-open "http://{args.host}:{args.port}/"'
-        print_message(f'running: {cmd}')
-        os.system(f'xdg-open "http://{args.host}:{args.port}/"')
+        url = f'http://{args.host}:{args.port}/'
+        print_message(f'open in browser: {url}')
+        open_new_tab(url)
     else:
         print_message('use --browser to open a browser automatically.')
     tornado.ioloop.IOLoop.current().start()
