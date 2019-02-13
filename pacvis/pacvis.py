@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import json
 from types import SimpleNamespace
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
@@ -170,7 +171,11 @@ def main():
         open_new_tab(url)
     else:
         print_message('use --browser to open a browser automatically.')
-    tornado.ioloop.IOLoop.current().start()
+    try:
+    	tornado.ioloop.IOLoop.current().start()
+    except KeyboardInterrupt:
+    	print_message("Received interrupt from keyboard, shutting down ...")
+    	sys.exit(0)
 
 
 if __name__ == "__main__":
