@@ -16,4 +16,5 @@ setup(name='PacVis',
       entry_points={
           'console_scripts': ['pacvis = pacvis.pacvis:main']
       },
+      install_requires=["tornado", "pyalpm",],
       )
