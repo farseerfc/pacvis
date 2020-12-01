@@ -38,7 +38,12 @@ layout algorithm is still slow (more than 5 mins).
 ```bash
 git clone https://github.com/farseerfc/pacvis.git
 cd pacvis
-python -m pacvis.pacvis
+
+python -m venv .venv
+source .venv/bin/activate
+
+pip install .
+pacvis
 ```
 
 ## To be improved ...
