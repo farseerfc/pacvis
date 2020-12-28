@@ -169,19 +169,17 @@ function togglehide() {
 
 function trysearch() {
   let pkgname = document.getElementById("search").value;
-  for (let node of nodes.get()) {
-    if (node.label == pkgname) {
-      network.selectNodes([ node.id ]);
-      selectPkg(node);
-      if (!node.hidden) {
-        network.focus(node.id, {
-          scale : Math.log(nodes.length) / 5,
-          locked : false,
-          animation : {duration : 300}
-        });
-      }
-    }
-  }
+  let gotNodes = nodes.get().filter(node => !node.hidden)
+  let nodeLabels = gotNodes.map(node => node.label)
+  let { bestMatchIndex } = stringSimilarity.findBestMatch(pkgname, nodeLabels)
+  let bestMatch = gotNodes[bestMatchIndex]
+  network.selectNodes([bestMatch.id])
+  selectPkg(bestMatch)
+  network.focus(bestMatch.id, {
+    scale: Math.log(gotNodes.length) / 5,
+    locked: false,
+    animation: { duration: 300 }
+  });
 }
 
 
