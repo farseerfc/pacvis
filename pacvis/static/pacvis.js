@@ -168,35 +168,74 @@ function togglehide() {
   }
 }
 
+// from https://github.com/aceakash/string-similarity
+// Copyright (c) 2018 Akash Kurdekar, licensed under MIT
+function compareTwoStrings(first, second) {
+	first = first.replace(/\s+/g, '')
+	second = second.replace(/\s+/g, '')
+
+	if (first === second) return 1; // identical or empty
+	if (first.length < 2 || second.length < 2) return 0; // if either is a 0-letter or 1-letter string
+
+	let firstBigrams = new Map();
+	for (let i = 0; i < first.length - 1; i++) {
+		const bigram = first.substring(i, i + 2);
+		const count = firstBigrams.has(bigram)
+			? firstBigrams.get(bigram) + 1
+			: 1;
+
+		firstBigrams.set(bigram, count);
+	};
+
+	let intersectionSize = 0;
+	for (let i = 0; i < second.length - 1; i++) {
+		const bigram = second.substring(i, i + 2);
+		const count = firstBigrams.has(bigram)
+			? firstBigrams.get(bigram)
+			: 0;
+
+		if (count > 0) {
+			firstBigrams.set(bigram, count - 1);
+			intersectionSize++;
+		}
+	}
+
+	return (2.0 * intersectionSize) / (first.length + second.length - 2);
+}
+
 // return a list of similar match, sorted by similarity
 function findmatch(pattern) {
   return (
     nodes.get()
-      .sort()  // sort alphabetically first
+      .sort() // sort alphabetically first
       .sort((a, b) => (
-        stringSimilarity.compareTwoStrings(pattern, b.label) -
-        stringSimilarity.compareTwoStrings(pattern, a.label)
+        compareTwoStrings(pattern, b.label) - compareTwoStrings(pattern, a.label)
       ))
       .slice(0, 5)
-  )
+  );
 }
 
 function trysearch() {
   let pkgname = document.getElementById("search").value;
   let found = findmatch(pkgname);
   let searchList = document.getElementById("search-list");
-  searchList.innerHTML = found.map(node => (
-    `<li class="mdl-list__item" data-nodeid="${node.id}">${node.label}</li>`
-  )).join('')
+  searchList.innerHTML = found.map(node => {
+    let highlighted = node.label.replace(pkgname, `<b>${pkgname}</b>`);
+    return (
+      `<li class="mdl-list__item" data-nodeid="${node.id}">${highlighted}</li>`
+    );
+  }).join('')
   searchList.style.display = pkgname ? "block" : "none";
   for (let el of searchList.children) {
-    el.addEventListener('click', searchItemClick)
+    el.addEventListener('click', searchItemClick);
   }
 }
 
 function searchItemClick(event) {
-  let node = nodes.get(event.target.dataset.nodeid)
-  network.selectNodes([node.id])
+  let node = nodes.get(event.target.dataset.nodeid);
+  document.getElementById("search").value = node.label;
+  document.getElementById("search-list").style.display = 'none';
+  network.selectNodes([node.id]);
   selectPkg(node)
   network.focus(node.id, {
     scale: Math.log(nodes.length) / 5,
