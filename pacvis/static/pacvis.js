@@ -143,6 +143,7 @@ function deselectPkg(){
     document.getElementById("searchwrapper").className.replace(/\bis-dirty\b/,'');
   document.getElementById("searchwrapper").className =
     document.getElementById("searchwrapper").className.replace(/\bis-focused\b/,'');
+  document.getElementById("search-list").style.display = 'none';
 }
 
 function togglehide() {
@@ -167,16 +168,38 @@ function togglehide() {
   }
 }
 
+// return a list of similar match, sorted by similarity
+function findmatch(pattern) {
+  return (
+    nodes.get()
+      .sort()  // sort alphabetically first
+      .sort((a, b) => (
+        stringSimilarity.compareTwoStrings(pattern, b.label) -
+        stringSimilarity.compareTwoStrings(pattern, a.label)
+      ))
+      .slice(0, 5)
+  )
+}
+
 function trysearch() {
   let pkgname = document.getElementById("search").value;
-  let gotNodes = nodes.get().filter(node => !node.hidden)
-  let nodeLabels = gotNodes.map(node => node.label)
-  let { bestMatchIndex } = stringSimilarity.findBestMatch(pkgname, nodeLabels)
-  let bestMatch = gotNodes[bestMatchIndex]
-  network.selectNodes([bestMatch.id])
-  selectPkg(bestMatch)
-  network.focus(bestMatch.id, {
-    scale: Math.log(gotNodes.length) / 5,
+  let found = findmatch(pkgname);
+  let searchList = document.getElementById("search-list");
+  searchList.innerHTML = found.map(node => (
+    `<li class="mdl-list__item" data-nodeid="${node.id}">${node.label}</li>`
+  )).join('')
+  searchList.style.display = pkgname ? "block" : "none";
+  for (let el of searchList.children) {
+    el.addEventListener('click', searchItemClick)
+  }
+}
+
+function searchItemClick(event) {
+  let node = nodes.get(event.target.dataset.nodeid)
+  network.selectNodes([node.id])
+  selectPkg(node)
+  network.focus(node.id, {
+    scale: Math.log(nodes.length) / 5,
     locked: false,
     animation: { duration: 300 }
   });
