@@ -108,11 +108,12 @@ function neighbourhoodHighlight(params) {
 
 var deselectTimeout = null;
 
-function selectPkg(node) {
+function showPkgInfo(node) {
   clearTimeout(deselectTimeout);
   document.getElementById("fsinfo").style.display = "block";
   document.querySelector('#fsinfo').className = "mdl-card mdl-shadow--4dp animated zoomIn";
-  document.getElementById("pkgname").innerHTML = node.label;
+  let label = node.label || node.hiddenLabel
+  document.getElementById("pkgname").innerHTML = label;
   document.getElementById("pkgsizedesc").innerHTML = {"isize":"Installed", "csize":"Cascade", "cssize":"Recursive"}[currentsize] + " Size";
   document.getElementById("pkgsize").innerHTML =  filesize(node[currentsize]);
   let reason = node.group == "normal" ? "as a dependency" : "explicitly";
@@ -129,6 +130,19 @@ function selectPkg(node) {
   document.getElementById("badgeoptdep").setAttribute('data-badge', node.optdeps=="" ? 0 : node.optdeps.split(', ').length);
   document.getElementById("pkggroups").innerHTML = createPkgListDom(node.groups);
   document.getElementById("pkgprovides").innerHTML = node.provides;
+}
+
+function selectPkg(node) {
+  let label = node.label || node.hiddenLabel
+  document.getElementById("search").value = label;
+  document.getElementById("search-list").style.display = 'none';
+  network.selectNodes([node.id]);
+  showPkgInfo(node)
+  network.focus(node.id, {
+    scale: Math.log(nodes.length) / 5,
+    locked: false,
+    animation: { duration: 300 }
+  });
 }
 
 function deselectPkg(){
@@ -238,15 +252,7 @@ function trysearch() {
 
 function searchItemClick(event) {
   let node = nodes.get(event.target.dataset.nodeid);
-  document.getElementById("search").value = node.label;
-  document.getElementById("search-list").style.display = 'none';
-  network.selectNodes([node.id]);
   selectPkg(node)
-  network.focus(node.id, {
-    scale: Math.log(nodes.length) / 5,
-    locked: false,
-    animation: { duration: 300 }
-  });
 }
 
 
