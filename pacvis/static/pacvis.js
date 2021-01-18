@@ -208,9 +208,13 @@ function findmatch(pattern) {
   return (
     nodes.get()
       .sort() // sort alphabetically first
-      .sort((a, b) => (
-        compareTwoStrings(pattern, b.label) - compareTwoStrings(pattern, a.label)
-      ))
+      .sort((a, b) => {
+        let aLabel = a.label || a.hiddenLabel
+        let bLabel = b.label || b.hiddenLabel
+        return (
+          compareTwoStrings(pattern, bLabel) - compareTwoStrings(pattern, aLabel)
+        )
+      })
       .slice(0, 5)
   );
 }
@@ -220,7 +224,8 @@ function trysearch() {
   let found = findmatch(pkgname);
   let searchList = document.getElementById("search-list");
   searchList.innerHTML = found.map(node => {
-    let highlighted = node.label.replace(pkgname, `<b>${pkgname}</b>`);
+    let label = node.label || node.hiddenLabel
+    let highlighted = label.replace(pkgname, `<b>${pkgname}</b>`);
     return (
       `<li class="mdl-list__item" data-nodeid="${node.id}">${highlighted}</li>`
     );
