@@ -16,15 +16,32 @@ function filesize(size) {
 
 function size2value(size) { return size==0 ? 12 : Math.sqrt(Math.sqrt(size)) / 5; }
 
+function getNodeLabel(node) { return node.label || node.hiddenLabel; }
+
 function createPkgListDom(list) {
   let depsdom = "";
+  // a package may not be in the graph when the dependency tree exceeds the limits
+  // make the button clickable only when the package is in the graph
+  let nodeLabels = nodes.map(getNodeLabel);
   if (list == "")
     return "<i>Nothing</i>";
   for (let dep of list.split(", ")) {
-    depsdom += "<button class=\"mdl-button mdl-js-button mdl-js-ripple-effect\" onclick='document.getElementById(\"search\").value=\"" +
-               dep + "\";trysearch()'>" + dep + "</a> ";
+    if (nodeLabels.includes(dep)) {
+      depsdom += "<button class=\"mdl-button mdl-js-button mdl-js-ripple-effect\" onclick='selectPkgByName(\"" +
+                 dep + "\")'>" + dep + "</button> ";
+    } else {
+      depsdom += '<button class="mdl-button mdl-js-button" disabled ' + 
+                 'title="This package is not available in the graph.\nTry setting a larger max-value and reload.">' + dep + '</button>';
+    }
   }
   return depsdom;
+}
+
+function selectPkgByName(name) {
+  let pkgnode = nodes.get({
+    filter: node => getNodeLabel(node) === name
+  })[0];
+  selectPkg(pkgnode);
 }
 
 var highlightActive = false;
@@ -112,8 +129,7 @@ function showPkgInfo(node) {
   clearTimeout(deselectTimeout);
   document.getElementById("fsinfo").style.display = "block";
   document.querySelector('#fsinfo').className = "mdl-card mdl-shadow--4dp animated zoomIn";
-  let label = node.label || node.hiddenLabel
-  document.getElementById("pkgname").innerHTML = label;
+  document.getElementById("pkgname").innerHTML = getNodeLabel(node);
   document.getElementById("pkgsizedesc").innerHTML = {"isize":"Installed", "csize":"Cascade", "cssize":"Recursive"}[currentsize] + " Size";
   document.getElementById("pkgsize").innerHTML =  filesize(node[currentsize]);
   let reason = node.group == "normal" ? "as a dependency" : "explicitly";
@@ -133,11 +149,10 @@ function showPkgInfo(node) {
 }
 
 function selectPkg(node) {
-  let label = node.label || node.hiddenLabel
-  document.getElementById("search").value = label;
+  document.getElementById("search").value = getNodeLabel(node);
   document.getElementById("search-list").style.display = 'none';
   network.selectNodes([node.id]);
-  showPkgInfo(node)
+  showPkgInfo(node);
   network.focus(node.id, {
     scale: Math.log(nodes.length) / 5,
     locked: false,
@@ -176,7 +191,7 @@ function togglehide() {
               {id : edge.id, hidden : nodes.get()[edge.from].hidden || hide});
         }
       }
-      selectPkg(node);
+      showPkgInfo(node);
       network.stabilize(50);
     }
   }
@@ -223,11 +238,11 @@ function findmatch(pattern) {
     nodes.get()
       .sort() // sort alphabetically first
       .sort((a, b) => {
-        let aLabel = a.label || a.hiddenLabel
-        let bLabel = b.label || b.hiddenLabel
+        let aLabel = getNodeLabel(a);
+        let bLabel = getNodeLabel(b);
         return (
           compareTwoStrings(pattern, bLabel) - compareTwoStrings(pattern, aLabel)
-        )
+        );
       })
       .slice(0, 5)
   );
@@ -238,7 +253,7 @@ function trysearch() {
   let found = findmatch(pkgname);
   let searchList = document.getElementById("search-list");
   searchList.innerHTML = found.map(node => {
-    let label = node.label || node.hiddenLabel
+    let label = getNodeLabel(node)
     let highlighted = label.replace(pkgname, `<b>${pkgname}</b>`);
     return (
       `<li class="mdl-list__item" data-nodeid="${node.id}">${highlighted}</li>`
@@ -252,7 +267,7 @@ function trysearch() {
 
 function searchItemClick(event) {
   let node = nodes.get(event.target.dataset.nodeid);
-  selectPkg(node)
+  selectPkg(node);
 }
 
 
