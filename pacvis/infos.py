@@ -5,7 +5,7 @@ import re
 import pyalpm
 import pycman
 
-from .console import start_message, append_message, print_message
+from console import start_message, append_message, print_message
 
 
 class DbInfo:

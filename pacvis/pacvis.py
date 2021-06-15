@@ -9,8 +9,8 @@ from webbrowser import open_new_tab
 import tornado.ioloop
 import tornado.web
 
-from .console import start_message, append_message, print_message
-from .infos import DbInfo, PkgInfo, GroupInfo, VDepInfo
+from console import start_message, append_message, print_message
+from infos import DbInfo, PkgInfo, GroupInfo, VDepInfo
 
 
 # Tornado entry
